@@ -45,8 +45,11 @@ baixa nesse momento (site estático, sem imagens, sem SSR). Toda a Fase 1 foi re
 versões (build, `check`, `test:unit`, as quatro rotas, `lang`/`aria-current`, fontes) sem nenhuma
 regressão de comportamento — só uma mudança de config necessária: Starlight 0.42 introduziu uma
 collection opcional `i18n` (`src/content/i18n/`, via `i18nLoader`/`i18nSchema`) para customizar strings
-de UI por idioma, registrada em `content.config.ts` para evitar warning de build; fica vazia até alguma
-fase futura precisar traduzir alguma string nativa do Starlight. Ao instalar dependências do zero num
+de UI por idioma, registrada em `content.config.ts` porque é um recurso real do 0.42 que uma fase
+futura pode usar pra traduzir strings nativas do Starlight — fica vazia por enquanto (o Starlight chama
+`getCollection('i18n')` incondicionalmente por baixo, então o warning de build de coleção vazia aparece
+de qualquer forma até ter conteúdo real ali; registrar a collection não elimina esse warning benigno,
+só documenta o recurso pra quando for usado). Ao instalar dependências do zero num
 checkout futuro, `astro` e `@astrojs/starlight` devem resolver para `^7.3.2`/`^0.42.0`
 (`package.json`/`package-lock.json` já refletem isso) — não reintroduzir os majors antigos.
 
