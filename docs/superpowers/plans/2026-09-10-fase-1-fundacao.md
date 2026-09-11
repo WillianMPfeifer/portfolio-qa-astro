@@ -800,7 +800,7 @@ Expected: imprime `ok`.
 - [ ] **Step 9: Rodar a suíte de testes unitários e a checagem de tipos uma última vez**
 
 Run: `npm run test:unit && npm run check`
-Expected: `test:unit` com 9 testes verdes; `check` com `0 errors`.
+Expected: `test:unit` com 11 testes verdes; `check` com `0 errors`.
 
 - [ ] **Step 10: Conferir o critério de aceite da Fase 1 (spec §6)**
 

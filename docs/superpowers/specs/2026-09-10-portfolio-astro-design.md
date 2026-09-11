@@ -196,18 +196,33 @@ relativa à raiz dela, aninhar o conteúdo uma pasta a mais (`docs/docs/...` em 
 todas as rotas saírem prefixadas com `/docs/...`. Feio no disco, mas sem custo de manutenção — é só onde
 o arquivo mora, o autor nunca vê esse detalhe ao editar um doc.
 
-**Limitação conhecida e aceita (confirmada na Fase 1, Task 2):** como a detecção de locale do Starlight
-olha o primeiro segmento da pasta dentro da collection `docs` (não um segmento interno), o conteúdo em
-`docs/docs/pt/` sai na URL certa (`/docs/pt/`) mas **não** é reconhecido pelo Starlight como locale `pt`
-de verdade — a página gera `<html lang="en">` mesmo com texto em português. Efeito colateral: o build
-também gera duas páginas órfãs em `/pt/docs/*` e `/pt/docs/pt/*` (cópias de fallback automáticas do
-Starlight, não linkadas em nenhum lugar do site nem indexadas na busca). Decisão: manter a URL
-`/docs/pt/` (consistência de "tudo sob /docs" pesa mais que o atributo `lang` de uma página) e aceitar as
-páginas órfãs como ruído inofensivo do build. Alternativa rejeitada: mover o conteúdo pt para
-`docs/pt/docs/` resolveria o `lang` e eliminaria as páginas órfãs, mas geraria a URL `/pt/docs/` em vez
-de `/docs/pt/`, quebrando a consistência que motivou o aninhamento em primeiro lugar. Tradução do
-conteúdo continua manual (arquivo por arquivo, como qualquer conteúdo bilíngue do site) — essa decisão
-não afeta isso.
+**Limitação conhecida e aceita (confirmada na Fase 1, Task 2; severidade real corrigida após a revisão
+final da fase):** como a detecção de locale do Starlight olha o primeiro segmento da pasta dentro da
+collection `docs` (não um segmento interno), o conteúdo em `docs/docs/pt/` sai na URL certa
+(`/docs/pt/`) mas **não** é reconhecido pelo Starlight como locale `pt` de verdade — a página gera
+`<html lang="en">` mesmo com texto em português. O build também gera duas páginas órfãs em
+`/pt/docs/*` e `/pt/docs/pt/*` (cópias de fallback automáticas do Starlight, com conteúdo em inglês).
+
+**Correção importante (a primeira versão desta nota estava errada):** essas páginas órfãs **não** são
+invisíveis — o seletor de idioma nativo do Starlight dentro de `/docs` linka para elas (`/pt/docs/`, não
+`/docs/pt/`), a barra lateral em inglês mostra o grupo "pt" aninhado dentro dela, a paginação
+"próxima página" atravessa idiomas, e o Pagefind indexa o conteúdo pt como se fosse inglês. Ou seja,
+hoje (Fase 1, só com a página placeholder de `/docs`) isso é invisível na prática porque não há conteúdo
+real — mas vai aparecer quebrado assim que a Fase 6 migrar a Wiki de verdade pra dentro do Starlight, se
+nada mudar até lá.
+
+Decisão: manter a URL `/docs/pt/` (consistência de "tudo sob /docs" pesa mais que o atributo `lang` de
+uma página) e resolver a navegação cruzada de idiomas dentro do Starlight **na Fase 6**, quando o
+conteúdo de docs deixa de ser um placeholder — não faz sentido construir esse componente agora sobre uma
+única página vazia. A Fase 6 precisa incluir, além da migração de conteúdo: (a) um `sidebar` explícito em
+`astro.config.mjs` (já previsto no plano da Fase 6 por outro motivo — organizar por tema), o que
+automaticamente impede o grupo "pt" de aparecer aninhado dentro da sidebar em inglês; e (b) um componente
+`LanguageSelect` customizado (via `starlight({ components: { LanguageSelect: '...' } })`) que troque
+`/docs/...` ↔ `/docs/pt/...` em vez de usar o link nativo do Starlight (que assume `/pt/docs/...`).
+Alternativa rejeitada: mover o conteúdo pt para `docs/pt/docs/` resolveria o `lang` e as páginas órfãs
+nativamente, mas geraria a URL `/pt/docs/` em vez de `/docs/pt/`, quebrando a consistência que motivou o
+aninhamento em primeiro lugar. Tradução do conteúdo continua manual (arquivo por arquivo, como qualquer
+conteúdo bilíngue do site) — essa decisão não afeta isso.
 
 ### 5.4 Rotas
 
@@ -288,6 +303,13 @@ desligado.
 Listagem, página de detalhe, componente de stack, navegação anterior/próximo. Dois case studies
 escritos de verdade (mobile e web).
 
+**Pendência herdada da Fase 1 (revisão final):** o alternador de idioma do `Header.astro` (Fase 1) troca
+de idioma reescrevendo o path atual (`/pt` ↔ raiz), o que assume que a versão pt e en de uma página
+sempre moram na mesma URL espelhada. Isso já quebra a decisão de `translationKey` do §5.2 (a própria
+razão de existir desse campo é permitir que os slugs pt/en sejam diferentes) — em `/projects/[slug]`
+essa Fase 3 precisa trocar a lógica do switcher para resolver o par via `translationKey` (com fallback
+pra home do idioma quando não existir tradução), em vez de estender a reescrita de path.
+
 *Aceite:* build quebra se um projeto vier sem campo obrigatório — testar de propósito.
 
 ### Fase 4 — Suíte de testes
@@ -306,7 +328,22 @@ Página `/quality` com os números, data do último run, link pro run no GitHub 
 ### Fase 6 — Docs
 Migrar a Wiki do GitHub pro Starlight. Sidebar por tema, não por ordem de criação.
 
-*Aceite:* busca funciona, sem link morto.
+**Pendências herdadas da Fase 1 (revisão final), a resolver nesta fase:**
+- **Sidebar explícito** (já previsto acima) também é o que evita o grupo "pt" aparecer aninhado dentro
+  da sidebar em inglês — sem isso, o conteúdo pt some misturado na navegação em inglês.
+- **Seletor de idioma customizado do Starlight:** o seletor nativo do Starlight dentro de `/docs` linka
+  pra `/pt/docs/...` (a página órfã de fallback, com conteúdo em inglês), não pra `/docs/pt/...` (ver
+  §5.3, "Limitação conhecida e aceita"). Com conteúdo real migrado, isso vira navegação quebrada visível
+  pro usuário, não só um detalhe técnico invisível. Resolver com
+  `starlight({ components: { LanguageSelect: '...' } })` customizado que troque `/docs/...` ↔
+  `/docs/pt/...`.
+- **Header/tokens compartilhados:** a decisão central do §2 ("`/docs` compartilha o mesmo header") ainda
+  não foi implementada — hoje `/docs` usa o header e o CSS padrão do Starlight, sem os tokens de cor/
+  tipografia do site nem o `Header.astro` customizado. Resolver via `starlight({ customCss:
+  ['./src/styles/tokens.css'], components: { Header: './src/components/Header.astro' } })`.
+
+*Aceite:* busca funciona, sem link morto, seletor de idioma dentro de `/docs` leva pra tradução real (não
+pra página de fallback), `/docs` usa o mesmo header e os mesmos tokens visuais do site principal.
 
 ### Fase 7 — Fechamento
 `/notes`, `/cv`, Open Graph por página, sitemap, RSS, `robots.txt`, favicon.
