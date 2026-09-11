@@ -196,6 +196,19 @@ relativa à raiz dela, aninhar o conteúdo uma pasta a mais (`docs/docs/...` em 
 todas as rotas saírem prefixadas com `/docs/...`. Feio no disco, mas sem custo de manutenção — é só onde
 o arquivo mora, o autor nunca vê esse detalhe ao editar um doc.
 
+**Limitação conhecida e aceita (confirmada na Fase 1, Task 2):** como a detecção de locale do Starlight
+olha o primeiro segmento da pasta dentro da collection `docs` (não um segmento interno), o conteúdo em
+`docs/docs/pt/` sai na URL certa (`/docs/pt/`) mas **não** é reconhecido pelo Starlight como locale `pt`
+de verdade — a página gera `<html lang="en">` mesmo com texto em português. Efeito colateral: o build
+também gera duas páginas órfãs em `/pt/docs/*` e `/pt/docs/pt/*` (cópias de fallback automáticas do
+Starlight, não linkadas em nenhum lugar do site nem indexadas na busca). Decisão: manter a URL
+`/docs/pt/` (consistência de "tudo sob /docs" pesa mais que o atributo `lang` de uma página) e aceitar as
+páginas órfãs como ruído inofensivo do build. Alternativa rejeitada: mover o conteúdo pt para
+`docs/pt/docs/` resolveria o `lang` e eliminaria as páginas órfãs, mas geraria a URL `/pt/docs/` em vez
+de `/docs/pt/`, quebrando a consistência que motivou o aninhamento em primeiro lugar. Tradução do
+conteúdo continua manual (arquivo por arquivo, como qualquer conteúdo bilíngue do site) — essa decisão
+não afeta isso.
+
 ### 5.4 Rotas
 
 | Rota | O que é |
