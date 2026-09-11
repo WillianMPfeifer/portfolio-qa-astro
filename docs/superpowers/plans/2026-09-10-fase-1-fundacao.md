@@ -1,5 +1,11 @@
 # Fase 1 — Fundação — Plano de Implementação
 
+> **Nota (2026-09-11):** os passos abaixo foram executados com Astro 5.18.2/Starlight 0.37.7 (as
+> versões descritas no texto). Logo depois, um upgrade de segurança subiu o projeto pra Astro
+> 7.3.2/Starlight 0.42.0 — ver spec §2.1a. O `package.json` do repositório reflete as versões novas; os
+> números de versão neste documento são o registro histórico do que rodou durante a Fase 1, não a
+> versão atual.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Colocar de pé o projeto Astro 5 com TypeScript strict, Starlight montado em `/docs`, i18n unificado pt/en, Content Collections tipadas (projects/notes), tokens visuais, fontes self-hosted e um layout base com header, alternador de idioma e alternador de tema.

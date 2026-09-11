@@ -11,8 +11,8 @@ export const projectSchema = z.object({
   featured: z.boolean(),
   lang: z.enum(['pt', 'en']),
   translationKey: z.string(),
-  url: z.string().url().optional(),
-  repo: z.string().url().optional(),
+  url: z.url().optional(),
+  repo: z.url().optional(),
 });
 
 export type Project = z.infer<typeof projectSchema>;

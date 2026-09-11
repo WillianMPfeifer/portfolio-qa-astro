@@ -21,7 +21,7 @@ O que o site precisa provar, e não só afirmar: que o autor sabe construir e ma
 
 | Camada | Escolha | Motivo |
 |---|---|---|
-| Framework | Astro 5 | Estático por padrão, zero JS no cliente sem pedir. Rápido é requisito, não bônus. |
+| Framework | Astro (7.x, ver nota de segurança abaixo) | Estático por padrão, zero JS no cliente sem pedir. Rápido é requisito, não bônus. |
 | Docs | Starlight | Sidebar, busca e i18n prontos. Monta em `/docs`. |
 | Conteúdo | Content Collections + Zod | Frontmatter tipado. Build quebra se faltar campo obrigatório. |
 | Estilo | CSS puro com custom properties | Sem Tailwind. O site é pequeno e o CSS é parte do que está sendo demonstrado. |
@@ -32,6 +32,23 @@ O que o site precisa provar, e não só afirmar: que o autor sabe construir e ma
 | Idiomas | pt-BR e en | `en` é o padrão da rota raiz. A vaga é fora. |
 
 Decisão central: **o site inteiro é um só projeto Astro**. Starlight roda como integração dentro dele, não como app separado. Assim `/docs` compartilha o mesmo header, o mesmo domínio e o mesmo deploy.
+
+### 2.1a Nota de segurança (2026-09-11): upgrade Astro 5 → 7
+
+A Fase 1 foi originalmente implementada e validada com Astro 5.18.2 + Starlight 0.37.7 (versões
+confirmadas funcionais na época). Ao instalar do zero pra finalizar a fase, `npm audit` revelou que
+Astro `<=7.2.7` tem 5 vulnerabilidades conhecidas, incluindo 1 crítica (XSS em múltiplos pontos,
+RCE via otimização de imagem AVIF, SSRF) e 1 alta (na lib `sharp` de imagem) — a correção exige subir
+pra Astro 7.3.2 (pulando a major 6 inteira) e Starlight 0.42.0 junto (peer dependency). Decisão: subir
+agora, antes de continuar construindo em cima de uma base vulnerável, mesmo com a exposição real sendo
+baixa nesse momento (site estático, sem imagens, sem SSR). Toda a Fase 1 foi re-verificada nas novas
+versões (build, `check`, `test:unit`, as quatro rotas, `lang`/`aria-current`, fontes) sem nenhuma
+regressão de comportamento — só uma mudança de config necessária: Starlight 0.42 introduziu uma
+collection opcional `i18n` (`src/content/i18n/`, via `i18nLoader`/`i18nSchema`) para customizar strings
+de UI por idioma, registrada em `content.config.ts` para evitar warning de build; fica vazia até alguma
+fase futura precisar traduzir alguma string nativa do Starlight. Ao instalar dependências do zero num
+checkout futuro, `astro` e `@astrojs/starlight` devem resolver para `^7.3.2`/`^0.42.0`
+(`package.json`/`package-lock.json` já refletem isso) — não reintroduzir os majors antigos.
 
 ### 2.1 Infraestrutura — estado atual e quando resolver
 
