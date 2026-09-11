@@ -1,11 +1,8 @@
 {
-  "name": "fase-1-fundacao",
+  "name": "portfolio-qa-astro",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "private": true,
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -15,8 +12,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@astrojs/starlight": "^0.37.7",
     "@fontsource-variable/archivo": "^5.3.0",
