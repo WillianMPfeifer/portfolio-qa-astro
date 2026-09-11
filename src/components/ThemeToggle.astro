@@ -1,0 +1,30 @@
+---
+---
+<button id="theme-toggle" aria-label="Toggle color theme" type="button">☾</button>
+
+<style>
+  #theme-toggle {
+    background: none;
+    border: 1px solid var(--ink-soft);
+    border-radius: 4px;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0.35rem 0.6rem;
+  }
+</style>
+
+<script>
+  // Mesma chave de localStorage que o ThemeSelect.astro do Starlight
+  // (storeTheme), para o tema ficar sincronizado entre o site principal e /docs.
+  const storageKey = 'starlight-theme';
+
+  const button = document.getElementById('theme-toggle');
+  button?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    localStorage.setItem(storageKey, next);
+  });
+</script>

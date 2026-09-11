@@ -1,0 +1,61 @@
+:root {
+  color-scheme: light;
+
+  --paper: #EDEFEE;
+  --ink: #16211D;
+  --ink-soft: #5C6B66;
+  --passed: #1F5F3F;
+  --failed: #8C2B22;
+  --skipped: #9A6B1F;
+
+  --font-display: 'Archivo Variable', sans-serif;
+  --font-body: 'Newsreader', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --measure: 72ch;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --paper: #121614;
+  --ink: #E4E8E6;
+  --ink-soft: #9AAAA4;
+  --passed: #3FA871;
+  --failed: #C1604A;
+  --skipped: #CDA050;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variation-settings: 'wdth' 125;
+  line-height: 1.15;
+}
+
+code,
+pre,
+.gherkin {
+  font-family: var(--font-mono);
+}

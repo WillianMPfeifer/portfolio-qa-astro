@@ -1,0 +1,59 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import ThemeToggle from './ThemeToggle.astro';
+
+const currentLocale = Astro.currentLocale ?? 'en';
+const pathWithoutLocale =
+  currentLocale === 'en'
+    ? Astro.url.pathname
+    : Astro.url.pathname.replace(new RegExp(`^/${currentLocale}(?=/|$)`), '') || '/';
+
+const ptHref = getRelativeLocaleUrl('pt', pathWithoutLocale);
+const enHref = getRelativeLocaleUrl('en', pathWithoutLocale);
+---
+
+<header>
+  <a href={getRelativeLocaleUrl(currentLocale, '/')} class="site-name">Willian</a>
+  <nav aria-label="Language">
+    <a href={ptHref} aria-current={currentLocale === 'pt' ? 'page' : undefined}>pt</a>
+    <span aria-hidden="true">·</span>
+    <a href={enHref} aria-current={currentLocale === 'en' ? 'page' : undefined}>en</a>
+  </nav>
+  <ThemeToggle />
+</header>
+
+<style>
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .site-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  nav[aria-label='Language'] {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  nav[aria-label='Language'] a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  nav[aria-label='Language'] a[aria-current='page'] {
+    color: var(--ink);
+    font-weight: 700;
+  }
+</style>
