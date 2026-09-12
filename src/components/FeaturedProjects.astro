@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+import { selectFeaturedProjects } from '../utils/featuredProjects';
+
+const locale = (Astro.currentLocale ?? 'en') as 'en' | 'pt';
+const allProjects = await getCollection('projects');
+const featured = selectFeaturedProjects(allProjects, locale);
+
+const readCaseLabel = locale === 'pt' ? 'leia o caso' : 'read the case';
+const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
+---
+
+{
+  featured.length > 0 && (
+    <section class="featured-projects" aria-label={sectionTitle}>
+      <h2>{sectionTitle}</h2>
+      <ul>
+        {featured.map((project) => (
+          <li>
+            <a href={project.data.url ?? '#'}>
+              <span class="title">{project.data.title}</span>
+              <span class="stack">{project.data.stack.join(' · ')}</span>
+              <span class="cta">{readCaseLabel}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .featured-projects {
+    padding: 1.5rem;
+    max-width: var(--measure);
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    border-top: 1px solid var(--ink-soft);
+    padding: 1rem 0;
+  }
+
+  li:last-child {
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  li a {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .title {
+    font-weight: 700;
+  }
+
+  .stack {
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .cta {
+    color: var(--ink-soft);
+  }
+</style>
