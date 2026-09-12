@@ -1,4 +1,9 @@
 ---
+// NOTA: o brief original (Step 5) apontava para '@fontsource-variable/archivo/full.css', mas esse
+// arquivo não existe no pacote instalado (versão 5.3.0). O pacote expõe os arquivos por eixo de
+// variação (wght.css, wdth.css, ...) e um arquivo combinado chamado 'standard.css', que é o
+// equivalente à fonte variável completa (eixos wght 100-900 e wdth/font-stretch 62%-125%) — é esse
+// arquivo que tokens.css precisa, já que h1/h2/h3 usam font-variation-settings: 'wdth' 125.
 import '@fontsource-variable/archivo/standard.css';
 import '@fontsource/newsreader/400.css';
 import '@fontsource/jetbrains-mono/400.css';
