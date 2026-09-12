@@ -1,0 +1,88 @@
+---
+import { hero } from '../data/hero';
+
+const locale = (Astro.currentLocale ?? 'en') as 'en' | 'pt';
+const content = hero[locale];
+---
+
+<section class="hero" aria-label="QA Engineer scenario">
+  <div class="gherkin">
+    <p class="feature">Feature: QA Engineer</p>
+    <p class="scenario">Scenario: {content.scenarioTitle}</p>
+    <p class="line line-given"><span class="keyword">Given</span> {content.given}</p>
+    <p class="line line-when"><span class="keyword">When</span> {content.when}</p>
+    <p class="line line-then"><span class="keyword">Then</span> {content.then}</p>
+  </div>
+  <p class="prose">{content.prose}</p>
+</section>
+
+<style>
+  .hero {
+    padding: 2rem 1.5rem;
+  }
+
+  .gherkin {
+    border-left: 3px solid var(--passed);
+    padding: 1rem 1.25rem;
+    max-width: var(--measure);
+  }
+
+  .feature,
+  .scenario {
+    margin: 0 0 0.5rem;
+    color: var(--ink-soft);
+  }
+
+  .line {
+    margin: 0.35rem 0;
+  }
+
+  .keyword {
+    font-weight: 700;
+    color: var(--passed);
+    margin-right: 0.5ch;
+  }
+
+  .prose {
+    max-width: var(--measure);
+    margin-top: 1.25rem;
+    color: var(--ink-soft);
+  }
+
+  @keyframes reveal-line {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .line-given,
+  .line-when,
+  .line-then {
+    animation: reveal-line 0.35s ease-out both;
+  }
+
+  .line-given {
+    animation-delay: 0s;
+  }
+
+  .line-when {
+    animation-delay: 0.25s;
+  }
+
+  .line-then {
+    animation-delay: 0.5s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .line-given,
+    .line-when,
+    .line-then {
+      animation: none;
+    }
+  }
+</style>
