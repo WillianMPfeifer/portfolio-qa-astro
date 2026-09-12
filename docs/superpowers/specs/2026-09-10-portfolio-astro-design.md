@@ -319,6 +319,83 @@ Hero com o bloco animado, seção de projetos em destaque lendo da collection, r
 *Aceite:* animação roda uma vez, some com `prefers-reduced-motion: reduce`, conteúdo legível com JS
 desligado.
 
+#### 6.2.1 Conteúdo do hero (Gherkin), definido em brainstorming (2026-09-12)
+
+Texto final do cenário Gherkin do hero, nas duas versões. Baseado em fatos reais (1 ano e meio à frente
+da qualidade num time de duas pessoas — não "sozinho": um colega do suporte entrou depois e foi treinado
+pelo autor, que hoje o gerencia). O diferencial escolhido de propósito: o que uma IA não faz é entender o
+time/cliente e ajustar a solução pra eles, incluindo trazer a ferramenta certa na hora certa — reforça a
+mesma ideia do spec §2 sobre usar Playwright em vez de só Cypress na suíte de testes ("não é uma pessoa
+de ferramenta só").
+
+**Inglês (locale raiz):**
+
+```gherkin
+Feature: QA Engineer
+
+  Scenario: a team that already automates needs backup
+    Given a year and a half leading quality,
+          manual testing and Cypress automation across three modules, and a two-person team
+     When a team already has an automation process
+          and needs someone who understands the client
+          and adjusts whatever needs adjusting
+     Then that guy is me
+```
+
+Prosa embaixo: *"Tests, an AI can write. Understanding the team and the client, adjusting for them, and
+bringing the right tool at the right time — that, it can't."*
+
+**Português:**
+
+```gherkin
+Feature: QA Engineer
+
+  Scenario: time que já automatiza busca reforço
+    Given um ano e meio à frente da qualidade,
+          manual e Cypress em três módulos, e um time de duas pessoas
+     When um time já tem processo de automação
+          e precisa de alguém que entenda o cliente
+          e ajuste o que for preciso
+     Then esse cara sou eu
+```
+
+Prosa embaixo: *"Testes uma IA escreve. Entender o time e o cliente, ajustar pra eles, e trazer a
+ferramenta certa na hora certa — isso não."*
+
+Regra de estilo aplicada aqui e daqui pra frente em qualquer texto novo do site: nada de travessão
+como pausa dramática no meio de frase (tique comum de escrita gerada por IA) — usar vírgula, ponto, ou
+reestruturar a frase.
+
+#### 6.2.2 Componentes e arquitetura
+
+- **`GherkinHero.astro`** — renderiza o bloco Gherkin + a frase de prosa abaixo dele. Lê
+  `Astro.currentLocale` (mesmo padrão do `Header.astro` da Fase 1) e escolhe o texto certo de
+  `src/data/hero.ts`, que exporta o conteúdo pt/en de §6.2.1 (evita duplicar o texto dentro de cada
+  página de home). Sem props — mesmo padrão do `Header`/`ThemeToggle`.
+- **Animação — CSS puro, sem JS:** cada linha (`Given`, `When`, `Then`) aparece em sequência via
+  `animation-delay` escalonado em cima de uma keyframe simples de opacidade + leve deslocamento
+  vertical. O HTML das três linhas já sai completo do servidor — a animação é puramente cosmética por
+  cima, então o conteúdo é sempre legível com JS desligado (não tem "reveal" condicionado a script
+  rodando). `@media (prefers-reduced-motion: reduce)` remove a animação (linhas aparecem direto, sem
+  delay). Roda uma vez só por natureza (é uma animação de entrada, não um loop). Rejeitado de propósito:
+  efeito de "máquina de escrever" letra por letra (JS ou CSS `steps()`) — cai na estética de "terminal de
+  hacker" que o spec §4 explicitamente pede pra evitar, e exigiria justificar uma exceção à regra de
+  zero JS.
+- **`FeaturedProjects.astro`** — busca a collection `projects` filtrando por `featured: true` e pelo
+  `lang` da rota atual. **Se a lista vier vazia (caso de hoje, antes da Fase 3), o componente não
+  renderiza nada** — nem título de seção, nem texto de "em breve" ou placeholder. Mesma regra de
+  honestidade do `/quality` (§3: "nada pode ser hardcoded, nunca um dado inventado") aplicada aqui: um
+  projeto falso pra preencher espaço seria o mesmo problema. A seção aparece sozinha assim que a Fase 3
+  adicionar projetos reais, sem precisar tocar em nada desta fase.
+- **`Footer.astro`** — quatro links, sempre nessa ordem: LinkedIn
+  (`linkedin.com/in/willian-menegazzo-pfeifer-22a62a2b4`), Email (`zepfeiferwillian@gmail.com`), GitHub
+  (`github.com/WillianMPfeifer`), Credly (`credly.com/users/willian-menegazzo-pfeifer`). Texto simples
+  (rótulo "LinkedIn"/"Email"/"GitHub"/"Credly"), sem ícone, tipografia do corpo — não é conteúdo
+  "de máquina", não usa `--font-mono`.
+
+**Responsivo até 360px:** o site já é coluna única por padrão (decisão do spec §4, layout), então isso é
+ajuste de padding/tamanho de fonte no CSS desta fase, não uma decisão de arquitetura nova.
+
 ### Fase 3 — Projetos e case studies
 Listagem, página de detalhe, componente de stack, navegação anterior/próximo. Dois case studies
 escritos de verdade (mobile e web).
