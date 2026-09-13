@@ -2,14 +2,20 @@
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import ThemeToggle from './ThemeToggle.astro';
 
+interface Props {
+  altLocaleHref?: { pt: string; en: string };
+}
+
+const { altLocaleHref } = Astro.props;
+
 const currentLocale = Astro.currentLocale ?? 'en';
 const pathWithoutLocale =
   currentLocale === 'en'
     ? Astro.url.pathname
     : Astro.url.pathname.replace(new RegExp(`^/${currentLocale}(?=/|$)`), '') || '/';
 
-const ptHref = getRelativeLocaleUrl('pt', pathWithoutLocale);
-const enHref = getRelativeLocaleUrl('en', pathWithoutLocale);
+const ptHref = altLocaleHref?.pt ?? getRelativeLocaleUrl('pt', pathWithoutLocale);
+const enHref = altLocaleHref?.en ?? getRelativeLocaleUrl('en', pathWithoutLocale);
 ---
 
 <header>
