@@ -409,6 +409,130 @@ pra home do idioma quando não existir tradução), em vez de estender a reescri
 
 *Aceite:* build quebra se um projeto vier sem campo obrigatório — testar de propósito.
 
+#### 6.3.1 Conteúdo dos dois case studies, definido em brainstorming (2026-09-13)
+
+Extraído diretamente do autor, não inventado. Ordem fixa do corpo (§5.2): Contexto → Problema →
+Decisões → Resultado. Nenhum dos dois tem `url`/`repo` — são automações internas de sistema de cliente,
+sem site nem repositório público (spec §7, regra de confidencialidade). Os dois saem em pt e en desde já
+(prioridade §1: recrutador internacional é o leitor nº 1). `web` aconteceu antes de `mobile`
+cronologicamente — usado pra decidir `date`.
+
+**Projeto "web" — otimização do pipeline de testes Cypress**
+
+Frontmatter: `title` "Otimizando o pipeline de testes Cypress" (pt) / "Optimizing the Cypress test
+pipeline" (en); `role`: "QA Tester"; `period`: "2025"; `date`: 2025-03-01; `stack`: `["Cypress",
+"JavaScript", "Bitbucket Pipelines"]`; `featured`: true; `translationKey`:
+"cypress-pipeline-optimization"; `problem` (resumo curto) pt: "Suite Cypress lenta e praticamente
+parada, com ~2h de execução." / en: "Cypress suite was slow and barely running, taking ~2h to
+execute."; `outcome` (resumo curto) pt: "Tempo de execução caiu para ~24 minutos (redução de ~80%)." /
+en: "Run time dropped to ~24 minutes (a ~80% reduction)."
+
+Corpo (pt):
+- **Contexto:** Suite de testes Cypress existia mas ficava parada, sem rodar ativamente, e levava cerca
+  de 2 horas quando rodava.
+- **Problema:** A lentidão vinha de várias causas: uso de memória e cache mal dimensionado na
+  infraestrutura, funções de validação rodando em loop, regras de negócio desatualizadas gerando
+  redundância nos testes, e falta geral de otimização (waits estáticos, login via UI).
+- **Decisões:** Ajustou a infraestrutura pra memória/cache, reduziu funções em loop de validação,
+  atualizou as regras de negócio pra eliminar redundância, substituiu waits estáticos por
+  interceptadores de API, passou o login a ser feito totalmente via API, e adicionou uma rotina de
+  limpeza de dados quebrados antes dos testes. Atualizou o Cypress da versão 6 pra 13, o que também
+  trouxe relatórios de teste mais otimizados.
+- **Resultado:** Tempo de execução caiu de cerca de 2 horas para cerca de 24 minutos — uma redução de
+  aproximadamente 80%.
+
+Corpo (en):
+- **Context:** A Cypress test suite existed but sat mostly idle, and took around 2 hours to run when it
+  did.
+- **Problem:** The slowness came from several causes: poorly sized memory/cache usage in the
+  infrastructure, validation functions running in loops, outdated business rules creating redundant
+  checks, and a general lack of optimization (static waits, UI-based login).
+- **Decisions:** Adjusted infrastructure for memory and cache, reduced loop-based validation functions,
+  updated business rules to remove redundancy, replaced static waits with API interceptors, moved login
+  to run entirely through the API, and added a routine to clean up broken data before tests run.
+  Upgraded Cypress from version 6 to 13, which also brought more optimized test reporting.
+- **Outcome:** Run time dropped from around 2 hours to around 24 minutes — roughly an 80% reduction.
+
+Nota deliberada de escopo: a expansão de cobertura (Saúde → Educação/Legislativo) aconteceu depois e é
+uma história separada — não faz parte deste case study. A pipeline do Bitbucket existe mas hoje os
+testes rodam manualmente quando necessário; por decisão do autor, o case study foca só na entrega
+técnica (otimização), sem mencionar o uso atual da pipeline.
+
+**Projeto "mobile" — arquitetura de testes mobile com Appium**
+
+Frontmatter: `title` "Arquitetura de testes mobile com Appium" (pt) / "Mobile test architecture with
+Appium" (en); `role`: "QA Tester"; `period`: "2025"; `date`: 2025-08-01; `stack`: `["Python", "Appium",
+"BDD"]`; `featured`: true; `translationKey`: "mobile-automation-appium"; `problem` (resumo curto) pt:
+"Nenhuma automação mobile existia; toda mudança exigia um dia inteiro de reteste manual." / en: "No
+mobile automation existed; every change required a full day of manual retesting."; `outcome` (resumo
+curto) pt: "Suite funcional cobrindo os principais fluxos do módulo de Educação." / en: "A working suite
+covering the main flows of the Education module."
+
+Corpo (pt):
+- **Contexto:** Não existia automação mobile. Toda alteração no app exigia reteste manual completo.
+- **Problema:** O reteste manual completo tomava pelo menos um dia inteiro de uma pessoa a cada
+  mudança. Automatizar mobile também se mostrou mais lento que web — selecionar elementos era
+  tranquilo, mas desenvolver os testes em cima deles levava bem mais tempo. O app tem uma função de
+  sincronizar dados com o sistema web, e cada cenário de teste precisava clicar em sincronizar e
+  esperar, o que consumia tempo extra.
+- **Decisões:** Python pela praticidade de desenvolvimento e disponibilidade de bibliotecas. Appium por
+  ser amplamente usado e combinar bem com BDD, que já fazia parte do dia a dia com automação web. Para
+  o problema de sincronização, criou um passo reutilizável no BDD que já cuida do clique e da espera,
+  em vez de repetir essa lógica em cada cenário.
+- **Resultado:** Suite de automação funcional cobrindo os principais fluxos do módulo de Educação, com
+  um passo reutilizável de sincronização resolvendo o gargalo de espera em todos os cenários.
+
+Corpo (en):
+- **Context:** No mobile automation existed. Every app change required a full manual regression test.
+- **Problem:** A full manual retest took at least a full day of one person's time for every change.
+  Automating mobile also turned out to be slower than web — selecting elements was straightforward, but
+  writing the tests around them took much longer. The app has a sync function that pushes data to the
+  web system, and every test scenario had to trigger that sync and wait, adding extra time.
+- **Decisions:** Chose Python for its development practicality and library ecosystem. Chose Appium for
+  its wide adoption and its fit with BDD, already part of the daily web automation workflow. For the
+  sync bottleneck, built a reusable BDD step that handles the tap-and-wait instead of repeating that
+  logic in every scenario.
+- **Outcome:** A working automation suite covering the main flows of the Education module, with a
+  reusable sync step resolving the wait bottleneck across all scenarios.
+
+Nota deliberada de escopo: a automação foi desprioridada pelo negócio depois de entregue (não por
+problema técnico) — por decisão do autor, o case study foca só na entrega técnica, sem mencionar isso.
+
+Nenhum dos dois case studies inclui trecho de `.feature` anonimizado (opcional, spec §5.7) nesta fase —
+fica pra uma iteração futura se fizer sentido, não bloqueia a Fase 3.
+
+#### 6.3.2 Componentes e arquitetura
+
+- **Componente de stack — corrige uma violação real já existente:** `FeaturedProjects.astro` (Fase 2)
+  usa `stack.join(' · ')`, exatamente o padrão "meta com ponto do meio" que o spec §4 proíbe (assinatura
+  de site gerado). Esta fase extrai um componente `StackList.astro` que renderiza cada tecnologia como
+  uma tag discreta (borda fina `var(--ink-soft)`, fonte `var(--font-mono)`, sem cor de destaque —
+  tecnologia não é "estado", não leva `--passed`/`--failed`/`--skipped`), separadas por espaçamento
+  (`flex`/`gap`), nunca por `·`. `FeaturedProjects.astro` passa a usar esse componente também,
+  substituindo o `join(' · ')` antigo.
+- **`/projects` (listagem):** reaproveita o padrão visual de lista com divisória fina que
+  `FeaturedProjects.astro` já estabeleceu (spec §4, layout) — mas lista **todos** os projetos do idioma
+  da rota atual (não só `featured`), ordenados por `date` decrescente (mais recente primeiro).
+- **`/projects/[slug]` (detalhe):** título, `role`, `period`, `StackList`, depois as quatro seções fixas
+  do corpo (Contexto → Problema → Decisões → Resultado) como blocos de texto corridos, link pro
+  produto/repo quando os campos `url`/`repo` existirem (nenhum dos dois projetos desta fase tem), e
+  navegação anterior/próximo no final da página.
+- **Anterior/próximo:** calculado a partir da lista ordenada por `date` (mesmo critério da listagem),
+  dentro do mesmo idioma da rota atual.
+- **Correção do alternador de idioma (`Header.astro`):** hoje o switcher só reescreve o path
+  (`/pt` ↔ raiz), o que funciona apenas porque `/` e `/pt/` são espelhadas — quebra assim que uma página
+  não tiver essa relação 1:1, que é exatamente o caso de `/projects/[slug]` quando os slugs pt/en
+  divergem (o que `translationKey` existe pra permitir). Fix: `Header.astro` ganha uma prop opcional
+  (ex: `altLocaleHref?: { pt: string; en: string }`) — quando fornecida, usa essas URLs em vez de
+  calcular por reescrita de path; quando ausente (todo o resto do site), mantém o comportamento atual
+  sem mudança. `src/pages/projects/[...slug].astro` calcula essa prop buscando na collection `projects`
+  a entrada com o mesmo `translationKey` e `lang` oposto; se não existir tradução daquele projeto
+  específico, a prop aponta pra home do idioma alvo (`/` ou `/pt/`) em vez de gerar um link morto pra um
+  slug que não existe.
+- **Fecha o TODO da Fase 2:** `FeaturedProjects.astro` tinha um comentário `TODO(Fase 3)` porque o link
+  "leia o caso" usava `project.data.url` (site do produto, não o case study). Esta fase troca isso pelo
+  link real de `/projects/[slug]`, calculado a partir do `id`/slug da entrada da collection.
+
 ### Fase 4 — Suíte de testes
 Playwright + Gherkin via playwright-bdd (ver §5.5). Cenários: navegação principal, troca de idioma,
 troca de tema, cada rota responde 200, links não quebrados. Mais `a11y.spec.ts` com axe em todas as
