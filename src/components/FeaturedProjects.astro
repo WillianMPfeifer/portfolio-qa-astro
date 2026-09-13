@@ -12,11 +12,14 @@ const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
 
 {
   featured.length > 0 && (
-    <section class="featured-projects" aria-label={sectionTitle}>
-      <h2>{sectionTitle}</h2>
+    <section class="featured-projects" aria-labelledby="featured-projects-heading">
+      <h2 id="featured-projects-heading">{sectionTitle}</h2>
       <ul>
         {featured.map((project) => (
           <li>
+            {/* TODO(Fase 3): trocar por /projects/[slug] quando a página de detalhe existir —
+                project.data.url é o site do produto/cliente, não o case study, e não deve ser
+                o destino do link "leia o caso"/"read the case". */}
             <a href={project.data.url ?? '#'}>
               <span class="title">{project.data.title}</span>
               <span class="stack">{project.data.stack.join(' · ')}</span>

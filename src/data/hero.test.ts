@@ -11,6 +11,7 @@ describe('hero content', () => {
     expect(content.when.trim().length).toBeGreaterThan(0);
     expect(content.then.trim().length).toBeGreaterThan(0);
     expect(content.prose.trim().length).toBeGreaterThan(0);
+    expect(content.regionLabel.trim().length).toBeGreaterThan(0);
   });
 
   it('closes the English scenario with the exact agreed punchline', () => {

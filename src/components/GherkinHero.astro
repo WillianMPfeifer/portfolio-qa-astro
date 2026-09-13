@@ -5,9 +5,9 @@ const locale = (Astro.currentLocale ?? 'en') as 'en' | 'pt';
 const content = hero[locale];
 ---
 
-<section class="hero" aria-label="QA Engineer scenario">
+<section class="hero" aria-label={content.regionLabel}>
   <div class="gherkin">
-    <p class="feature">Feature: QA Engineer</p>
+    <h1 class="feature">Feature: QA Engineer</h1>
     <p class="scenario">Scenario: {content.scenarioTitle}</p>
     <p class="line line-given"><span class="keyword">Given</span> {content.given}</p>
     <p class="line line-when"><span class="keyword">When</span> {content.when}</p>
@@ -31,6 +31,12 @@ const content = hero[locale];
   .scenario {
     margin: 0 0 0.5rem;
     color: var(--ink-soft);
+  }
+
+  .feature {
+    font-size: 1rem;
+    font-weight: normal;
+    font-variation-settings: normal;
   }
 
   .line {

@@ -59,7 +59,3 @@ pre,
 .gherkin {
   font-family: var(--font-mono);
 }
-
-main {
-  padding-inline: 1rem;
-}

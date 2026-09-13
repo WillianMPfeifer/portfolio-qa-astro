@@ -4,6 +4,7 @@ export interface HeroContent {
   when: string;
   then: string;
   prose: string;
+  regionLabel: string;
 }
 
 export const hero: Record<'en' | 'pt', HeroContent> = {
@@ -15,6 +16,7 @@ export const hero: Record<'en' | 'pt', HeroContent> = {
     then: 'that guy is me',
     prose:
       "Tests, an AI can write. Understanding the team and the client, adjusting for them, and bringing the right tool at the right time — that, it can't.",
+    regionLabel: 'QA Engineer scenario',
   },
   pt: {
     scenarioTitle: 'time que já automatiza busca reforço',
@@ -24,5 +26,6 @@ export const hero: Record<'en' | 'pt', HeroContent> = {
     then: 'esse cara sou eu',
     prose:
       'Testes uma IA escreve. Entender o time e o cliente, ajustar pra eles, e trazer a ferramenta certa na hora certa — isso não.',
+    regionLabel: 'Cenário de QA Engineer',
   },
 };
