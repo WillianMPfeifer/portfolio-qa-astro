@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StackList from '../../components/StackList.astro';
+import { getProjectsByLang } from '../../utils/projectList';
+
+const allProjects = await getCollection('projects');
+const projects = getProjectsByLang(allProjects, 'en');
+---
+
+<BaseLayout title="Willian — Projects">
+  <ul class="project-list">
+    {
+      projects.map((project) => (
+        <li>
+          <a href={`/projects/${project.id}`}>
+            <span class="title">{project.data.title}</span>
+            <span class="meta">
+              {project.data.role}, {project.data.period}
+            </span>
+            <StackList stack={project.data.stack} />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .project-list {
+    list-style: none;
+    margin: 0;
+    padding: 1.5rem;
+    max-width: var(--measure);
+  }
+
+  .project-list li {
+    border-top: 1px solid var(--ink-soft);
+    padding: 1rem 0;
+  }
+
+  .project-list li:last-child {
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .project-list a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .title {
+    font-weight: 700;
+  }
+
+  .meta {
+    color: var(--ink-soft);
+  }
+</style>
