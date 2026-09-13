@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { selectFeaturedProjects } from '../utils/featuredProjects';
+import StackList from './StackList.astro';
 
 const locale = (Astro.currentLocale ?? 'en') as 'en' | 'pt';
 const allProjects = await getCollection('projects');
@@ -8,6 +9,10 @@ const featured = selectFeaturedProjects(allProjects, locale);
 
 const readCaseLabel = locale === 'pt' ? 'leia o caso' : 'read the case';
 const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
+
+function projectHref(id: string): string {
+  return locale === 'pt' ? `/pt/projects/${id}` : `/projects/${id}`;
+}
 ---
 
 {
@@ -17,12 +22,9 @@ const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
       <ul>
         {featured.map((project) => (
           <li>
-            {/* TODO(Fase 3): trocar por /projects/[slug] quando a página de detalhe existir —
-                project.data.url é o site do produto/cliente, não o case study, e não deve ser
-                o destino do link "leia o caso"/"read the case". */}
-            <a href={project.data.url ?? '#'}>
+            <a href={projectHref(project.id)}>
               <span class="title">{project.data.title}</span>
-              <span class="stack">{project.data.stack.join(' · ')}</span>
+              <StackList stack={project.data.stack} />
               <span class="cta">{readCaseLabel}</span>
             </a>
           </li>
@@ -56,6 +58,7 @@ const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
   li a {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
     color: var(--ink);
@@ -64,12 +67,6 @@ const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
 
   .title {
     font-weight: 700;
-  }
-
-  .stack {
-    color: var(--ink-soft);
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
   }
 
   .cta {
