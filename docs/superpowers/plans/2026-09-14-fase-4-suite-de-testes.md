@@ -683,7 +683,7 @@ Expected: PASS, 1 scenario.
 - [ ] **Step 6: Run the full e2e suite so far**
 
 Run: `npm run test:e2e`
-Expected: PASS, all scenarios from Tasks 2-4 green (5 scenarios total).
+Expected: PASS, all scenarios from Tasks 2-4 green (4 scenarios total).
 
 - [ ] **Step 7: Commit**
 
@@ -741,7 +741,7 @@ Expected: PASS. If it fails, read the violation JSON in the failure output — i
 - [ ] **Step 3: Run the entire e2e suite**
 
 Run: `npm run test:e2e`
-Expected: PASS, all 6 tests (5 BDD scenarios + this a11y spec).
+Expected: PASS, all 5 tests (4 BDD scenarios + this a11y spec).
 
 - [ ] **Step 4: Commit**
 
@@ -769,7 +769,7 @@ EOF
 - [ ] **Step 1: Rodar a suíte completa do zero**
 
 Run: `npm run build && npm run test:unit && npm run test:e2e`
-Expected: `build` limpo, `test:unit` com todos os testes verdes (os pré-existentes mais os 2 novos de `crawler.test.ts`), `test:e2e` com os 6 testes verdes.
+Expected: `build` limpo, `test:unit` com todos os testes verdes (os pré-existentes mais os 2 novos de `crawler.test.ts`), `test:e2e` com os 5 testes verdes.
 
 - [ ] **Step 2: Demonstração reproduzível — quebrar um link real de propósito**
 
@@ -808,7 +808,7 @@ Expected: `nothing to commit, working tree clean` (ou equivalente, sem `Featured
 - [ ] **Step 5: Rodar a suíte inteira de novo pra confirmar que voltou a ficar verde**
 
 Run: `npm run test:e2e`
-Expected: PASS, 6 testes, incluindo os 2 cenários de `site-health.feature`.
+Expected: PASS, 5 testes, incluindo os 2 cenários de `site-health.feature`.
 
 - [ ] **Step 6: Nada para commitar nesta tarefa**
 
