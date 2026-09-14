@@ -6,3 +6,7 @@ dist/
 .astro/
 .env
 .DS_Store
+test-results/
+playwright-report/
+blob-report/
+.features-gen/
