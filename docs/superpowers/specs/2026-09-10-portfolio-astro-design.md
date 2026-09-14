@@ -540,6 +540,71 @@ rotas.
 
 *Aceite:* `npm run test:e2e` verde local, e um teste falha de propósito quando um link é quebrado.
 
+#### 6.4.1 Decisões de brainstorming (2026-09-14)
+
+**Idioma do Gherkin: inglês.** Decisão consciente, não padrão automático — o autor usa português no
+Gherkin do trabalho atual, mas aqui pesa mais o leitor nº 1 do spec §1 (recrutador técnico gringo) e o
+fato de que código/teste em inglês é esperado até em times 100% brasileiros com processo de QA maduro.
+Isso não enfraquece a adaptação pt-BR do site: essa adaptação já existe desde a Fase 1 (rota raiz en,
+`/pt/` com conteúdo próprio, não traduzido automaticamente) e é o que um recrutador brasileiro vê ao
+navegar o site — o Gherkin só aparece pra quem abre o repositório.
+
+**Descoberta de rotas: crawler, não lista hardcoded.** Satisfaz a regra do §5.7 ("`tests/` nunca muda
+quando conteúdo é adicionado"): um crawler parte de `/`, coleta todo `<a href>` interno, visita cada
+rota descoberta e repete a coleta ali, até não sobrar link novo (crawl transitivo). Cobre "cada rota
+responde 200" e "links não quebrados" com o mesmo mecanismo, e pega página órfã (sem link de lugar
+nenhum apontando pra ela) pelo motivo oposto: se nada aponta pra ela, ela nunca entra no grafo — como
+quase aconteceu com `/projects` até a Fase 3 corrigir. Roda contra `astro build && astro preview` (fiel
+à produção), não `astro dev`.
+
+**"Teste falha de propósito quando um link quebra" (critério de aceite) não é um teste automatizado
+permanente** — não faz sentido commitar um link quebrado de propósito no histórico. É um procedimento de
+demonstração reproduzível, documentado e executado uma vez como evidência: comentar/remover um `href`
+real do site, rodar `npm run test:e2e`, observar a falha do cenário de `site-health.feature`, reverter.
+
+**Arquitetura de testes: BDD + Page Object Model + Elements, locators via `getByRole`/`getByText`.**
+Decisão do autor, não só recomendação — sem `data-testid` nos componentes Astro. Cada página tem um
+Page Object (`pages/*.ts`) que só orquestra ações, e um arquivo de elements irmão (`elements/*.elements.ts`)
+que só declara `Locator`s — separação clássica de responsabilidade entre "onde clicar" e "o que fazer
+ao clicar", e mais uma peça de vitrine de boas práticas pro recrutador técnico (spec §1, leitor nº 2).
+
+#### 6.4.2 Estrutura de arquivos e cenários
+
+```
+tests/
+  features/
+    site-health.feature       # cada rota responde 200, links não quebrados (crawler)
+    theme-toggle.feature       # alternar tema e persistir
+    language-switch.feature    # trocar pt/en preservando o case study certo
+  steps/
+    site-health.steps.ts
+    theme-toggle.steps.ts
+    language-switch.steps.ts
+  pages/
+    BasePage.ts                # navegação comum
+    HomePage.ts
+    ProjectDetailPage.ts
+  elements/
+    HomePage.elements.ts
+    ProjectDetailPage.elements.ts
+  a11y.spec.ts                 # axe puro (não-Gherkin), varre as rotas do crawler
+  support/
+    crawler.ts                 # crawl transitivo a partir de "/", retorna as rotas internas
+  playwright.config.ts
+```
+
+- **`site-health.feature`** — dois cenários sobre o mesmo crawler: "All internal links resolve" (cada
+  rota descoberta responde 200) e "No broken links are left behind" (cada `href` individual responde
+  ok, não só a página que o contém — pega um link morto específico mesmo numa página que carrega).
+- **`theme-toggle.feature`** — tema inicial respeita `prefers-color-scheme`, alternar muda `data-theme`,
+  e o valor persiste depois de recarregar a página.
+- **`language-switch.feature`** — usa os dois case studies reais da Fase 3
+  (`cypress-pipeline-optimization` / `mobile-automation-appium`, slugs pt/en divergentes de propósito):
+  trocar de idioma numa página de detalhe cai na versão traduzida daquele mesmo case study, não na home
+  — cobre exatamente a correção do `Header.astro` feita na Fase 3 (§6.3.2).
+- **`a11y.spec.ts`** — `AxeBuilder` roda em cada rota que `support/crawler.ts` descobrir (reuso do
+  mesmo crawler dos cenários de `site-health`), zero violação `WCAG2A`/`WCAG2AA`.
+
 ### Fase 5 — CI e `/quality`
 Workflow: build → Playwright → axe → Lighthouse CI (ver §5.6 para o pipeline de dados completo).
 Página `/quality` com os números, data do último run, link pro run no GitHub e link pros `.feature`.
