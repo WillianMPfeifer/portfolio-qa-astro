@@ -2,6 +2,13 @@ import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    exclude: [...configDefaults.exclude, '.worktrees/**', 'dist/**', '.astro/**'],
+    exclude: [
+      ...configDefaults.exclude,
+      '.worktrees/**',
+      'dist/**',
+      '.astro/**',
+      '.features-gen/**',
+      'tests/**/*.spec.ts',
+    ],
   },
 });
