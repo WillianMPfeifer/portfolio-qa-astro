@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StackList from '../../components/StackList.astro';
-import { getAdjacentProjects, resolveAltLocaleHref } from '../../utils/projectList';
+import { getAdjacentProjects, projectHref, resolveAltLocaleHref } from '../../utils/projectList';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -25,7 +25,7 @@ const { prev, next } = getAdjacentProjects(allProjects, 'en', project.id);
 const altLocaleHref = resolveAltLocaleHref(project, allProjects);
 ---
 
-<BaseLayout title={project.data.title} altLocaleHref={altLocaleHref}>
+<BaseLayout title={`Willian — ${project.data.title}`} altLocaleHref={altLocaleHref}>
   <article class="case-study">
     <h1>{project.data.title}</h1>
     <p class="meta">
@@ -39,7 +39,7 @@ const altLocaleHref = resolveAltLocaleHref(project, allProjects);
       <div class="prev">
         {
           prev && (
-            <a href={`/projects/${prev.id}`}>
+            <a href={projectHref(prev)}>
               <span class="direction">Previous</span>
               <span class="title">{prev.data.title}</span>
             </a>
@@ -49,7 +49,7 @@ const altLocaleHref = resolveAltLocaleHref(project, allProjects);
       <div class="next">
         {
           next && (
-            <a href={`/projects/${next.id}`}>
+            <a href={projectHref(next)}>
               <span class="direction">Next</span>
               <span class="title">{next.data.title}</span>
             </a>

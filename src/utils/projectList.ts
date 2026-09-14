@@ -22,18 +22,24 @@ export function getAdjacentProjects(
   };
 }
 
-function projectHref(entry: CollectionEntry<'projects'>): string {
-  return entry.data.lang === 'pt' ? `/pt/projects/${entry.id}` : `/projects/${entry.id}`;
+export function projectHref(entry: CollectionEntry<'projects'>): string {
+  return entry.data.lang === 'pt' ? `/pt/projects/${entry.id}/` : `/projects/${entry.id}/`;
 }
 
 export function resolveAltLocaleHref(
   current: CollectionEntry<'projects'>,
   allEntries: CollectionEntry<'projects'>[],
 ): { pt: string; en: string } {
-  const sibling = allEntries.find(
+  const siblings = allEntries.filter(
     (entry) =>
       entry.data.translationKey === current.data.translationKey && entry.data.lang !== current.data.lang,
   );
+  if (siblings.length > 1) {
+    throw new Error(
+      `translationKey "${current.data.translationKey}" matches more than one entry with a different language — translationKey must be unique per language.`,
+    );
+  }
+  const sibling = siblings[0] ?? null;
   const selfHref = projectHref(current);
   const siblingHref = sibling ? projectHref(sibling) : null;
 

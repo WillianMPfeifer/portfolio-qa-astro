@@ -62,6 +62,12 @@ describe('getAdjacentProjects', () => {
     expect(result.prev).toBeNull();
     expect(result.next).toBeNull();
   });
+
+  it('returns null for both when the current id is not found in the list', () => {
+    const result = getAdjacentProjects(entries, 'en', 'does-not-exist');
+    expect(result.prev).toBeNull();
+    expect(result.next).toBeNull();
+  });
 });
 
 describe('resolveAltLocaleHref', () => {
@@ -69,14 +75,14 @@ describe('resolveAltLocaleHref', () => {
     const en = makeEntry('cypress-en', { lang: 'en', translationKey: 'cypress' });
     const pt = makeEntry('cypress-pt', { lang: 'pt', translationKey: 'cypress' });
     const result = resolveAltLocaleHref(en, [en, pt]);
-    expect(result.en).toBe('/projects/cypress-en');
-    expect(result.pt).toBe('/pt/projects/cypress-pt');
+    expect(result.en).toBe('/projects/cypress-en/');
+    expect(result.pt).toBe('/pt/projects/cypress-pt/');
   });
 
   it('falls back to the target language home page when no translation exists', () => {
     const en = makeEntry('solo-en', { lang: 'en', translationKey: 'solo' });
     const result = resolveAltLocaleHref(en, [en]);
-    expect(result.en).toBe('/projects/solo-en');
+    expect(result.en).toBe('/projects/solo-en/');
     expect(result.pt).toBe('/pt/');
   });
 
@@ -84,7 +90,14 @@ describe('resolveAltLocaleHref', () => {
     const en = makeEntry('cypress-en', { lang: 'en', translationKey: 'cypress' });
     const pt = makeEntry('cypress-pt', { lang: 'pt', translationKey: 'cypress' });
     const result = resolveAltLocaleHref(pt, [en, pt]);
-    expect(result.pt).toBe('/pt/projects/cypress-pt');
-    expect(result.en).toBe('/projects/cypress-en');
+    expect(result.pt).toBe('/pt/projects/cypress-pt/');
+    expect(result.en).toBe('/projects/cypress-en/');
+  });
+
+  it('throws when translationKey matches more than one entry in the other language', () => {
+    const en = makeEntry('cypress-en', { lang: 'en', translationKey: 'cypress' });
+    const ptA = makeEntry('cypress-pt-a', { lang: 'pt', translationKey: 'cypress' });
+    const ptB = makeEntry('cypress-pt-b', { lang: 'pt', translationKey: 'cypress' });
+    expect(() => resolveAltLocaleHref(en, [en, ptA, ptB])).toThrow();
   });
 });

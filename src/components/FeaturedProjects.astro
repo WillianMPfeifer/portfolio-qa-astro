@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { selectFeaturedProjects } from '../utils/featuredProjects';
+import { projectHref } from '../utils/projectList';
 import StackList from './StackList.astro';
 
 const locale = (Astro.currentLocale ?? 'en') as 'en' | 'pt';
@@ -9,10 +10,6 @@ const featured = selectFeaturedProjects(allProjects, locale);
 
 const readCaseLabel = locale === 'pt' ? 'leia o caso' : 'read the case';
 const sectionTitle = locale === 'pt' ? 'Projetos' : 'Projects';
-
-function projectHref(id: string): string {
-  return locale === 'pt' ? `/pt/projects/${id}` : `/projects/${id}`;
-}
 ---
 
 {
@@ -22,7 +19,7 @@ function projectHref(id: string): string {
       <ul>
         {featured.map((project) => (
           <li>
-            <a href={projectHref(project.id)}>
+            <a href={projectHref(project)}>
               <span class="title">{project.data.title}</span>
               <StackList stack={project.data.stack} />
               <span class="cta">{readCaseLabel}</span>
@@ -30,6 +27,9 @@ function projectHref(id: string): string {
           </li>
         ))}
       </ul>
+      <a class="see-all" href={locale === 'pt' ? '/pt/projects/' : '/projects/'}>
+        {locale === 'pt' ? 'ver todos os projetos' : 'see all projects'}
+      </a>
     </section>
   )
 }
@@ -70,6 +70,12 @@ function projectHref(id: string): string {
   }
 
   .cta {
+    color: var(--ink-soft);
+  }
+
+  .see-all {
+    display: inline-block;
+    margin-top: 1rem;
     color: var(--ink-soft);
   }
 </style>

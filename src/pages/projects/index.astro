@@ -2,18 +2,19 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StackList from '../../components/StackList.astro';
-import { getProjectsByLang } from '../../utils/projectList';
+import { getProjectsByLang, projectHref } from '../../utils/projectList';
 
 const allProjects = await getCollection('projects');
 const projects = getProjectsByLang(allProjects, 'en');
 ---
 
 <BaseLayout title="Willian — Projects">
+  <h1>Projects</h1>
   <ul class="project-list">
     {
       projects.map((project) => (
         <li>
-          <a href={`/projects/${project.id}`}>
+          <a href={projectHref(project)}>
             <span class="title">{project.data.title}</span>
             <span class="meta">
               {project.data.role}, {project.data.period}
