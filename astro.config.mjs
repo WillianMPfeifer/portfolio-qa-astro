@@ -10,6 +10,11 @@ export default defineConfig({
         root: { label: 'English', lang: 'en' },
         pt: { label: 'Português', lang: 'pt' },
       },
+      sidebar: [
+        { label: 'Web', items: [{ autogenerate: { directory: 'web' } }] },
+        { label: 'Mobile', items: [{ autogenerate: { directory: 'mobile' } }] },
+        { label: 'Processo', items: [{ autogenerate: { directory: 'processo' } }] },
+      ],
     }),
   ],
 });
