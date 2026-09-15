@@ -24,6 +24,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.13.0",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.63.0",
     "playwright-bdd": "^9.2.1",
     "typescript": "^5.9.3",
