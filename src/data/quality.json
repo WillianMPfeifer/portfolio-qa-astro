@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-15T09:53:59.448Z",
-  "runUrl": "https://github.com/WillianMPfeifer/portfolio-qa-astro/actions/runs/34954841368",
-  "commitSha": "42d64aa28cf4fbc05fc18a22f6f65a41372ec7d3",
+  "generatedAt": "2026-09-15T19:14:29.212Z",
+  "runUrl": "https://github.com/WillianMPfeifer/portfolio-qa-astro/actions/runs/35012171900",
+  "commitSha": "88d402483468dc9fd949b452388cec36ae9a6c5f",
   "playwright": {
     "scenarios": [
       {
@@ -29,7 +29,7 @@
     "total": 5
   },
   "a11y": {
-    "routesChecked": 10,
+    "routesChecked": 13,
     "violations": 0
   },
   "lighthouse": {
@@ -38,5 +38,5 @@
     "bestPractices": 0.96,
     "seo": 0.9
   },
-  "bundleSizeBytes": 1471276
+  "bundleSizeBytes": 1443360
 }
