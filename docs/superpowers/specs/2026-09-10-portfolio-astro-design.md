@@ -185,10 +185,11 @@ src/
     projects/        # case studies (md)
     notes/            # textos curtos, hobbies, aprendizado
     docs/
-      docs/           # aninhado propositalmente — ver nota abaixo
-        index.md      # inglês (locale raiz), rota final: /docs/
-        pt/
-          index.md    # português, rota final: /docs/pt/
+      docs/           # aninhado propositalmente — ver nota abaixo (inglês, locale raiz)
+        index.md      # rota final: /docs/
+      pt/
+        docs/         # mesmo aninhamento, dentro do locale pt — ver revisão de 2026-09-15
+          index.md    # rota final: /pt/docs/
   content.config.ts   # schemas Zod
   layouts/
   pages/
@@ -213,8 +214,45 @@ só as do Starlight (confirmado nas discussões
 [#1447](https://github.com/withastro/starlight/discussions/1447)). O workaround documentado pela
 comunidade é: como as rotas do Starlight espelham a estrutura de pastas dentro da collection `docs`
 relativa à raiz dela, aninhar o conteúdo uma pasta a mais (`docs/docs/...` em vez de `docs/...`) faz
-todas as rotas saírem prefixadas com `/docs/...`. Feio no disco, mas sem custo de manutenção — é só onde
-o arquivo mora, o autor nunca vê esse detalhe ao editar um doc.
+as rotas em inglês saírem prefixadas com `/docs/...`. Feio no disco, mas sem custo de manutenção — é só
+onde o arquivo mora, o autor nunca vê esse detalhe ao editar um doc.
+
+**Revisão de arquitetura (2026-09-15, durante a revisão final da Fase 6) — URL do português mudou de
+`/docs/pt/` pra `/pt/docs/`.** A decisão original (documentada abaixo, mantida como histórico) tentava
+manter tudo sob `/docs/` aninhando o conteúdo pt uma pasta a mais dentro de `docs/docs/pt/`. A
+implementação da Fase 6 revelou que essa decisão tinha um problema mais sério do que o `lang="en"`
+cosmético originalmente identificado na Fase 1: a detecção de locale do Starlight olha **apenas o
+primeiro segmento** do caminho do arquivo dentro da collection (confirmado lendo
+`node_modules/@astrojs/starlight/dist/integrations/shared/slugToLocale.js` — `slug.split('/')[0]`
+comparado contra os locales configurados). Como o aninhamento força esse primeiro segmento a ser sempre
+`docs` (nunca `pt`), o Starlight nunca reconhece nenhuma página de `/docs/pt/` como português de
+verdade — não só o atributo `lang`, mas também: a sidebar autogerada nunca lista conteúdo pt (o filtro
+por locale do Starlight usa a mesma detecção quebrada), e um seletor de idioma customizado que
+reescrevesse `/docs/` ↔ `/docs/pt/` por path geraria link morto sempre que um documento não estivesse
+espelhado nos dois idiomas — o que quebraria o teste de "links não quebrados" da Fase 4 na primeira doc
+escrita só em um idioma.
+
+Investigação de alternativas antes de decidir: o Starlight tem uma API de `routeMiddleware` que permite
+sobrescrever metadados de uma rota (incluindo `lang`/`dir`) depois que a página é roteada — mas ela só
+pode ser registrada por um plugin do Starlight (via `addRouteMiddleware` no hook `config:setup`, não uma
+opção direta de `starlight({...})`), e o middleware roda **depois** que a sidebar da página já foi
+calculada com o locale errado — corrigir a sidebar de verdade exigiria recalcular a árvore manualmente
+usando funções internas do Starlight sem API pública estável. Resolveria o `lang`, não resolveria a
+sidebar nem o risco de link morto.
+
+**Decisão revisada:** mover o conteúdo pt pra fora do aninhamento sob `/docs/`, pro padrão nativo de
+i18n do Astro/Starlight — `content/docs/pt/docs/...`, gerando a URL `/pt/docs/...` (locale como prefixo,
+depois o mesmo aninhamento de sempre pra manter o sufixo `/docs`). Com isso, o primeiro segmento do
+slug de qualquer página pt é `pt` — um locale configurado de verdade — e o Starlight reconhece o idioma
+nativamente em tudo: `lang`/`dir` corretos, sidebar autogerada funciona pros dois idiomas sem código
+customizado, e o `LanguageSelect` nativo do Starlight (não mais um componente customizado, ver §6.6.1)
+já calcula o par de idioma certo sozinho. O custo aceito: a URL deixa de ser "tudo sob /docs" (agora é
+`/docs/` en e `/pt/docs/` pt, como o resto do site) — a consistência que motivou a decisão original da
+Fase 1 perde pro fato de que a alternativa rejeitada na época se mostrou ter consequências maiores do
+que "só o atributo lang".
+
+<details>
+<summary>Decisão original da Fase 1 (histórico, substituída acima)</summary>
 
 **Limitação conhecida e aceita (confirmada na Fase 1, Task 2; severidade real corrigida após a revisão
 final da fase):** como a detecção de locale do Starlight olha o primeiro segmento da pasta dentro da
@@ -223,26 +261,17 @@ collection `docs` (não um segmento interno), o conteúdo em `docs/docs/pt/` sai
 `<html lang="en">` mesmo com texto em português. O build também gera duas páginas órfãs em
 `/pt/docs/*` e `/pt/docs/pt/*` (cópias de fallback automáticas do Starlight, com conteúdo em inglês).
 
-**Correção importante (a primeira versão desta nota estava errada):** essas páginas órfãs **não** são
-invisíveis — o seletor de idioma nativo do Starlight dentro de `/docs` linka para elas (`/pt/docs/`, não
-`/docs/pt/`), a barra lateral em inglês mostra o grupo "pt" aninhado dentro dela, a paginação
-"próxima página" atravessa idiomas, e o Pagefind indexa o conteúdo pt como se fosse inglês. Ou seja,
-hoje (Fase 1, só com a página placeholder de `/docs`) isso é invisível na prática porque não há conteúdo
-real — mas vai aparecer quebrado assim que a Fase 6 migrar a Wiki de verdade pra dentro do Starlight, se
-nada mudar até lá.
+Decisão original: manter a URL `/docs/pt/` (consistência de "tudo sob /docs" pesa mais que o atributo
+`lang` de uma página) e resolver a navegação cruzada de idiomas dentro do Starlight na Fase 6.
+Alternativa rejeitada na época: mover o conteúdo pt para `docs/pt/docs/` resolveria o `lang` e as
+páginas órfãs nativamente, mas geraria a URL `/pt/docs/` em vez de `/docs/pt/` — essa é exatamente a
+alternativa adotada na revisão de 2026-09-15 acima, depois que a Fase 6 mostrou que o problema ia além
+do `lang`.
 
-Decisão: manter a URL `/docs/pt/` (consistência de "tudo sob /docs" pesa mais que o atributo `lang` de
-uma página) e resolver a navegação cruzada de idiomas dentro do Starlight **na Fase 6**, quando o
-conteúdo de docs deixa de ser um placeholder — não faz sentido construir esse componente agora sobre uma
-única página vazia. A Fase 6 precisa incluir, além da migração de conteúdo: (a) um `sidebar` explícito em
-`astro.config.mjs` (já previsto no plano da Fase 6 por outro motivo — organizar por tema), o que
-automaticamente impede o grupo "pt" de aparecer aninhado dentro da sidebar em inglês; e (b) um componente
-`LanguageSelect` customizado (via `starlight({ components: { LanguageSelect: '...' } })`) que troque
-`/docs/...` ↔ `/docs/pt/...` em vez de usar o link nativo do Starlight (que assume `/pt/docs/...`).
-Alternativa rejeitada: mover o conteúdo pt para `docs/pt/docs/` resolveria o `lang` e as páginas órfãs
-nativamente, mas geraria a URL `/pt/docs/` em vez de `/docs/pt/`, quebrando a consistência que motivou o
-aninhamento em primeiro lugar. Tradução do conteúdo continua manual (arquivo por arquivo, como qualquer
-conteúdo bilíngue do site) — essa decisão não afeta isso.
+</details>
+
+Tradução do conteúdo continua manual (arquivo por arquivo, como qualquer conteúdo bilíngue do site) —
+essa decisão não afeta isso.
 
 ### 5.4 Rotas
 
@@ -286,10 +315,13 @@ mudam quando conteúdo novo é adicionado a `/projects` ou `/docs`. Isso evita q
 precisa de manutenção de pipeline toda vez que a pessoa termina um trabalho novo — adicionar conteúdo é
 sempre "criar um arquivo", nunca "mexer em CI".
 
-**Novo doc técnico (`/docs`):** criar `src/content/docs/docs/<slug>.md` (rota final `/docs/<slug>/` —
-ver §5.3 sobre o aninhamento) e, se for traduzir, o espelho em `src/content/docs/docs/pt/<slug>.md`
-(rota `/docs/pt/<slug>/`). Adicionar uma linha no array de `sidebar` em `astro.config.mjs`, no grupo
-temático certo. Duas edições, nenhuma outra.
+**Novo doc técnico (`/docs`):** criar `src/content/docs/docs/<categoria>/<slug>.md` (rota final
+`/docs/<categoria>/<slug>/` — ver §5.3 sobre o aninhamento, e §6.6.1 sobre as categorias) e, se for
+traduzir, o espelho em `src/content/docs/pt/docs/<categoria>/<slug>.md` (rota
+`/pt/docs/<categoria>/<slug>/` — desde a revisão de 2026-09-15, o locale vem primeiro, não mais aninhado
+dentro de `/docs`). A sidebar é gerada por `autogenerate` (Fase 6) — nenhuma edição em
+`astro.config.mjs` é necessária, só criar o arquivo na pasta certa. Uma edição (duas se traduzir),
+nenhuma outra.
 
 **Novo case study — landing page, automação de cliente, projeto pessoal, o que for:** criar
 `src/content/projects/<slug>.md` (e o espelho em outro idioma se for o caso) com o schema de §5.2,
@@ -715,12 +747,13 @@ sem depender de conteúdo pronto.
 **Pendências herdadas da Fase 1 (revisão final), a resolver nesta fase:**
 - **Sidebar explícito** (já previsto acima) também é o que evita o grupo "pt" aparecer aninhado dentro
   da sidebar em inglês — sem isso, o conteúdo pt some misturado na navegação em inglês.
-- **Seletor de idioma customizado do Starlight:** o seletor nativo do Starlight dentro de `/docs` linka
-  pra `/pt/docs/...` (a página órfã de fallback, com conteúdo em inglês), não pra `/docs/pt/...` (ver
-  §5.3, "Limitação conhecida e aceita"). Com conteúdo real migrado, isso vira navegação quebrada visível
-  pro usuário, não só um detalhe técnico invisível. Resolver com
-  `starlight({ components: { LanguageSelect: '...' } })` customizado que troque `/docs/...` ↔
-  `/docs/pt/...`.
+- **Seletor de idioma:** resolvido por consequência da revisão de arquitetura de 2026-09-15 (ver §5.3 e
+  §6.6.1) — com o conteúdo pt vivendo em `/pt/docs/` (padrão nativo de i18n do Astro/Starlight, não mais
+  o aninhamento sob `/docs/`), o seletor de idioma **nativo** do Starlight já calcula o par de idioma
+  certo sozinho. Nenhum componente customizado é necessário; a tentativa original de corrigir isso com um
+  `LanguageSelect` customizado (mantendo a URL `/docs/pt/`) foi revertida depois que a implementação desta
+  fase mostrou que o problema de detecção de locale ia além do link do seletor — também quebrava a
+  sidebar e criava risco de link morto para conteúdo não espelhado nos dois idiomas.
 - **Tokens visuais compartilhados:** a decisão central do §2 ("`/docs` compartilha o mesmo header") ainda
   não foi implementada — hoje `/docs` usa o header e as cores padrão do Starlight. **Decisão revisada
   durante o brainstorming desta fase, depois de inspecionar o componente `Header` nativo do Starlight:**
@@ -736,8 +769,8 @@ sem depender de conteúdo pronto.
 
 *Aceite:* busca funciona, sem link morto, seletor de idioma dentro de `/docs` leva pra tradução real (não
 pra página de fallback), `/docs` usa os mesmos tokens visuais (cor e tipografia) do site principal, sidebar
-organizada nos 3 grupos temáticos (§6.6.1), e adicionar um `.md` novo na pasta certa não exige tocar em
-nenhum outro arquivo.
+organizada nos 3 grupos temáticos (§6.6.1) funcionando nos dois idiomas de verdade, e adicionar um `.md`
+novo na pasta certa não exige tocar em nenhum outro arquivo.
 
 #### 6.6.1 Decisões de brainstorming (2026-09-15)
 
@@ -746,38 +779,48 @@ nenhum outro arquivo.
 ritmo, depois que a infraestrutura estiver pronta. Fase 6 entrega só a base técnica; nenhuma task depende
 de um documento real existir.
 
-**Estrutura de arquivos — 3 categorias temáticas, generalizando a convenção já definida em §5.7:**
+**Estrutura de arquivos — 3 categorias temáticas, generalizando a convenção já definida em §5.7. Revisada
+em 2026-09-15 (ver §5.3) pra usar `/pt/docs/` em vez de `/docs/pt/`:**
 
 ```
-src/content/docs/docs/
-  index.md              # landing de /docs (en)
-  web/<slug>.md          # categoria Web/Cypress
-  mobile/<slug>.md       # categoria Mobile/Appium
-  processo/<slug>.md     # categoria Processo de QA
+src/content/docs/
+  docs/                  # inglês (locale raiz)
+    index.md              # landing de /docs
+    web/<slug>.md          # categoria Web/Cypress
+    mobile/<slug>.md       # categoria Mobile/Appium
+    processo/<slug>.md     # categoria Processo de QA
   pt/
-    index.md             # landing de /docs/pt (pt)
-    web/<slug>.md
-    mobile/<slug>.md
-    processo/<slug>.md
+    docs/                # português — mesmo aninhamento, agora dentro do locale pt de verdade
+      index.md            # landing de /pt/docs
+      web/<slug>.md
+      mobile/<slug>.md
+      processo/<slug>.md
 ```
 
 As 3 categorias espelham os dois case studies já publicados (Cypress, Appium) mais uma categoria de
 processo/gestão de QA (o material já listado em §7 — redesenho de processo, templates de teste, etc.).
-Todo o conteúdo pt continua sob um único `pt/` na raiz de `docs/docs/` (mesmo padrão já usado pro
-`index.md`), não uma pasta `pt/` por categoria — mantém o "aninhado uma vez só" que §5.3 já estabeleceu.
-Adicionar um documento novo é só criar o arquivo na pasta certa (e o espelho em `pt/<categoria>/` se for
-traduzir) — nenhuma outra edição, seguindo a mesma regra de manutenção do §5.7.
+O conteúdo pt agora vive sob `pt/docs/` (locale primeiro, aninhamento de `/docs` depois) — o Starlight
+reconhece `pt` como locale de verdade porque é o primeiro segmento do caminho, ao contrário da estrutura
+original `docs/docs/pt/`. Adicionar um documento novo é só criar o arquivo na pasta certa (e o espelho
+em `pt/docs/<categoria>/` se for traduzir) — nenhuma outra edição, seguindo a mesma regra de manutenção
+do §5.7.
 
 **Sidebar gerada por diretório, não listada manualmente.** Cada grupo temático usa
-`starlight({ sidebar: [{ label: 'Web', autogenerate: { directory: 'web' } }, ...] })` em vez de enumerar
-páginas uma a uma — um `.md` novo na pasta certa aparece sozinho na sidebar, sem precisar editar
-`astro.config.mjs` de novo. **Confirmado lendo o código-fonte do Starlight instalado** (0.42.0,
-`node_modules/@astrojs/starlight/dist/utils/navigation.js`, função `entriesFromAutogenerateConfig`):
-o `directory` do `autogenerate` já é prefixado automaticamente pelo locale atual
-(`localeDir = locale ? locale + '/' + directory : directory`) — ou seja, um único
-`autogenerate: { directory: 'web' }` resolve pra `docs/web/*` no inglês (locale raiz) e `docs/pt/web/*`
-no português, sozinho, sem vazamento entre os dois. Não é uma suposição a verificar depois; é o
-comportamento real do pacote já instalado neste projeto.
+`starlight({ sidebar: [{ label: 'Web', items: [{ autogenerate: { directory: 'docs/web' } }] }, ...] })`
+em vez de enumerar páginas uma a uma — um `.md` novo na pasta certa aparece sozinho na sidebar, sem
+precisar editar `astro.config.mjs` de novo. (A sintaxe `items: [{ autogenerate }]`, não `{ label,
+autogenerate }` direto, é a exigida pelo Starlight 0.42.0 — a forma mais antiga foi removida na 0.39;
+confirmado por um erro de build real durante a implementação, não assumido.) O `directory` é relativo à
+raiz da collection `docs` (`src/content/docs/`), por isso `docs/web`, não só `web` — como o conteúdo
+real fica aninhado um nível a mais (`docs/docs/web/...`), o valor precisa incluir esse `docs/` também
+(achado real durante a Fase 6: a primeira tentativa usou só `web`, o que builda sem erro mas nunca lista
+nada na sidebar, porque o path relativo à raiz da collection nunca bate com o filtro). **Confirmado
+lendo o código-fonte do Starlight instalado** (0.42.0, `node_modules/@astrojs/starlight/dist/utils/navigation.js`,
+função `entriesFromAutogenerateConfig`): o `directory` do `autogenerate` é prefixado automaticamente
+pelo locale atual (`localeDir = locale ? locale + '/' + directory : directory`) — com a estrutura
+revisada (`pt/docs/web/...`), um único `autogenerate: { directory: 'docs/web' }` resolve pra
+`docs/web/*` no inglês (locale raiz) e `pt/docs/web/*` no português, sozinho, sem vazamento entre os
+dois — e agora funciona de verdade nos dois idiomas, porque o `pt` inicial é reconhecido como locale.
 
 **Cobertura do crawler/a11y.** Nenhuma página de `/docs` é alcançável hoje a partir de nenhum lugar
 navegável do site — é exatamente o gap que a revisão final da Fase 5 encontrou (o crawler da Fase 4 só
@@ -789,31 +832,34 @@ depois dessa fase corrigir o header/tokens delas.
 #### 6.6.2 Componentes e arquitetura
 
 - **`astro.config.mjs`** — `starlight({...})` ganha `sidebar: [...]` com os 3 grupos por `autogenerate`
-  (`web`, `mobile`, `processo`), `customCss: [...]` (retema + fontes, ver abaixo), e
-  `components: { LanguageSelect: '...' }` (só esse, não `Header`).
+  (`docs/web`, `docs/mobile`, `docs/processo`) e `customCss: [...]` (retema + fontes, ver abaixo). Nenhum
+  `components` customizado — nem `Header` (decisão original, ver acima) nem `LanguageSelect` (revisão de
+  2026-09-15: com `/pt/docs/` seguindo o padrão nativo de i18n, o seletor nativo do Starlight já funciona
+  sozinho).
 - **`src/styles/starlight-tokens.css`** (novo arquivo, listado em `customCss`) — sobrescreve as
   variáveis `--sl-color-*` do Starlight (`--sl-color-bg`, `--sl-color-bg-nav`, `--sl-color-bg-sidebar`,
   `--sl-color-text`, `--sl-color-text-accent`, `--sl-color-accent`, `--sl-color-hairline*`) apontando
-  pros tokens já existentes (`--paper`, `--ink`, `--ink-soft`, `--passed`), tanto pro bloco escuro
-  (`:root`, que é o padrão do Starlight) quanto pro claro (`:root[data-theme='light']` — mesmo seletor
-  que o próprio Starlight usa, e que já é a chave que `ThemeToggle.astro`/`starlight-theme` no
-  `localStorage` já controlam desde a Fase 1, sem precisar de nenhuma ponte nova). Sem `@layer` nessas
-  regras — CSS sem camada sempre vence sobre o `@layer starlight.base` que o Starlight usa, então a
-  sobrescrita funciona por especificidade de cascata simples, sem precisar competir em especificidade de
-  seletor.
+  pros tokens já existentes (`--paper`, `--ink`, `--ink-soft`, `--passed`) — **um único bloco `:root {
+  ... }` incondicional, não dois blocos separados por tema.** `var(--paper)` etc. já resolvem certo em
+  claro/escuro sozinhos, porque `src/styles/tokens.css` já define o valor claro no `:root` puro e o
+  escuro em `:root[data-theme='dark']` — referenciar `var(--paper)` aqui pega o que estiver valendo no
+  momento, sem precisar duplicar essa condicional. Sem `@layer` nessas regras — CSS sem camada sempre
+  vence sobre o `@layer starlight.base` que o Starlight usa (confirmado lendo
+  `node_modules/@astrojs/starlight/dist/integrations/vite-virtual-modules.js`: `customCss` é injetado
+  como `import` simples, nunca dentro de uma camada), então a sobrescrita funciona por prioridade de
+  cascata, independente de especificidade de seletor.
 - **Fontes do site também em `customCss`** — as importações Fontsource (`@fontsource-variable/archivo/standard.css`,
   `@fontsource/newsreader/400.css`, `@fontsource/jetbrains-mono/400.css`) hoje só acontecem dentro de
   `BaseLayout.astro`, que as páginas do Starlight não usam — precisam ser listadas também no array
   `customCss` do `astro.config.mjs` pra carregar dentro do contexto do Starlight.
-- **`src/components/StarlightLanguageSelect.astro`** (ou nome equivalente) — substitui o seletor nativo
-  do Starlight, calculando o link pt↔en por reescrita de path (`/docs/...` ↔ `/docs/pt/...`) a partir de
-  `Astro.url.pathname`, já que `/docs` é sempre espelhado 1:1 entre os dois idiomas (diferente de
-  `/projects/[slug]`, que precisou do `translationKey`/`resolveAltLocaleHref` na Fase 3 por causa de
-  slugs divergentes — aqui não há esse problema). Renderiza dois links de texto simples ("pt"/"en"),
-  mesmo padrão visual do `Header.astro` do site principal, em vez do `<select>` nativo do Starlight —
-  consistência visual sem precisar reconstruir o dropdown nativo.
-- **Link pra `/docs`** em `Header.astro` (ou onde fizer mais sentido visualmente) — fecha o gap de
-  cobertura do crawler/a11y descrito acima.
+- **Sem componente de `LanguageSelect` customizado** (revisão de 2026-09-15) — o seletor nativo do
+  Starlight já resolve `/docs/...` ↔ `/pt/docs/...` sozinho, porque essa é exatamente a convenção de
+  i18n nativa que ele espera. Uma tentativa anterior desta fase construiu um componente customizado pra
+  reescrever `/docs/...` ↔ `/docs/pt/...` por path — descartada junto com a mudança de URL.
+- **Link pra `/docs`** em `Header.astro` — fecha o gap de cobertura do crawler/a11y descrito acima. Usa
+  `getRelativeLocaleUrl(currentLocale, '/docs')`, o mesmo helper já usado pro link de `/quality` — com
+  `/docs` seguindo agora o padrão nativo de prefixo de locale, não precisa mais do path especial que a
+  versão anterior desta fase exigia.
 - **Nenhum conteúdo novo nesta fase** além do que já existe (a página placeholder de `/docs`) — os
   slugs `web/`, `mobile/`, `processo/` só precisam existir como convenção documentada aqui; não é
   necessário criar pastas vazias no repositório (Git não versiona diretório vazio, e Starlight não exige
