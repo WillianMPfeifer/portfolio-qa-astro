@@ -1,0 +1,13 @@
+:root {
+  --sl-color-bg: var(--paper);
+  --sl-color-bg-nav: var(--paper);
+  --sl-color-bg-sidebar: var(--paper);
+  --sl-color-text: var(--ink);
+  --sl-color-text-accent: var(--passed);
+  --sl-color-accent: var(--passed);
+  --sl-color-hairline: var(--ink-soft);
+  --sl-color-hairline-light: var(--ink-soft);
+  --sl-color-hairline-shade: var(--ink-soft);
+  --sl-font: var(--font-body);
+  --sl-font-mono: var(--font-mono);
+}
