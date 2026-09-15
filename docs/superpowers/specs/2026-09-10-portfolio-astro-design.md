@@ -721,13 +721,21 @@ sem depender de conteúdo pronto.
   pro usuário, não só um detalhe técnico invisível. Resolver com
   `starlight({ components: { LanguageSelect: '...' } })` customizado que troque `/docs/...` ↔
   `/docs/pt/...`.
-- **Header/tokens compartilhados:** a decisão central do §2 ("`/docs` compartilha o mesmo header") ainda
-  não foi implementada — hoje `/docs` usa o header e o CSS padrão do Starlight, sem os tokens de cor/
-  tipografia do site nem o `Header.astro` customizado. Resolver via `starlight({ customCss:
-  ['./src/styles/tokens.css'], components: { Header: './src/components/Header.astro' } })`.
+- **Tokens visuais compartilhados:** a decisão central do §2 ("`/docs` compartilha o mesmo header") ainda
+  não foi implementada — hoje `/docs` usa o header e as cores padrão do Starlight. **Decisão revisada
+  durante o brainstorming desta fase, depois de inspecionar o componente `Header` nativo do Starlight:**
+  trocar o componente inteiro (`components: { Header: '...' }`) descartaria a busca (Pagefind), os ícones
+  sociais e o seletor de tema que o header nativo já resolve — teria que reconstruir tudo isso dentro do
+  componente customizado, mais risco pra reganhar o que já funciona. Em vez disso, o header nativo do
+  Starlight continua estrutural e funcionalmente como está, e ganha apenas um **retema via variáveis CSS**
+  (`--sl-color-*`, a forma padrão documentada pelo próprio Starlight de re-estilizar), mapeando pros
+  tokens já existentes do site (`--paper`/`--ink`/`--ink-soft`/`--passed`) — inclusive as fontes
+  (Fontsource), que precisam ser importadas separadamente pro contexto do Starlight já que ele não passa
+  pelo `BaseLayout.astro` do site principal. Só o `LanguageSelect` continua sendo um componente
+  customizado de verdade, porque ali o problema é funcional (link errado), não visual.
 
 *Aceite:* busca funciona, sem link morto, seletor de idioma dentro de `/docs` leva pra tradução real (não
-pra página de fallback), `/docs` usa o mesmo header e os mesmos tokens visuais do site principal, sidebar
+pra página de fallback), `/docs` usa os mesmos tokens visuais (cor e tipografia) do site principal, sidebar
 organizada nos 3 grupos temáticos (§6.6.1), e adicionar um `.md` novo na pasta certa não exige tocar em
 nenhum outro arquivo.
 
@@ -763,12 +771,13 @@ traduzir) — nenhuma outra edição, seguindo a mesma regra de manutenção do 
 **Sidebar gerada por diretório, não listada manualmente.** Cada grupo temático usa
 `starlight({ sidebar: [{ label: 'Web', autogenerate: { directory: 'web' } }, ...] })` em vez de enumerar
 páginas uma a uma — um `.md` novo na pasta certa aparece sozinho na sidebar, sem precisar editar
-`astro.config.mjs` de novo. **Ponto a verificar durante a implementação, não assumido aqui:** a forma
-exata de fazer esse `autogenerate` respeitar o locale correto (grupo "Web" mostrando `docs/web/*` no
-inglês e `docs/pt/web/*` no português, sem vazar um pro outro) depende do comportamento real da API de
-i18n do Starlight instalado (0.42.0) — a implementação deve confirmar isso empiricamente (rodar
-`npm run build` e inspecionar as rotas geradas, mesmo método já usado desde a Fase 1) e ajustar se a API
-real divergir do que está descrito aqui.
+`astro.config.mjs` de novo. **Confirmado lendo o código-fonte do Starlight instalado** (0.42.0,
+`node_modules/@astrojs/starlight/dist/utils/navigation.js`, função `entriesFromAutogenerateConfig`):
+o `directory` do `autogenerate` já é prefixado automaticamente pelo locale atual
+(`localeDir = locale ? locale + '/' + directory : directory`) — ou seja, um único
+`autogenerate: { directory: 'web' }` resolve pra `docs/web/*` no inglês (locale raiz) e `docs/pt/web/*`
+no português, sozinho, sem vazamento entre os dois. Não é uma suposição a verificar depois; é o
+comportamento real do pacote já instalado neste projeto.
 
 **Cobertura do crawler/a11y.** Nenhuma página de `/docs` é alcançável hoje a partir de nenhum lugar
 navegável do site — é exatamente o gap que a revisão final da Fase 5 encontrou (o crawler da Fase 4 só
@@ -780,17 +789,29 @@ depois dessa fase corrigir o header/tokens delas.
 #### 6.6.2 Componentes e arquitetura
 
 - **`astro.config.mjs`** — `starlight({...})` ganha `sidebar: [...]` com os 3 grupos por `autogenerate`
-  (`web`, `mobile`, `processo`), `customCss: ['./src/styles/tokens.css']`, e
-  `components: { Header: '...', LanguageSelect: '...' }`.
-- **`src/components/StarlightHeader.astro`** (ou nome equivalente) — wrapper fino que reaproveita o
-  `Header.astro` do site principal dentro do contexto do Starlight (que passa props diferentes das
-  páginas normais do site) — a implementação decide o nome exato e a ponte necessária entre as duas
-  APIs de props durante a Fase 6.
+  (`web`, `mobile`, `processo`), `customCss: [...]` (retema + fontes, ver abaixo), e
+  `components: { LanguageSelect: '...' }` (só esse, não `Header`).
+- **`src/styles/starlight-tokens.css`** (novo arquivo, listado em `customCss`) — sobrescreve as
+  variáveis `--sl-color-*` do Starlight (`--sl-color-bg`, `--sl-color-bg-nav`, `--sl-color-bg-sidebar`,
+  `--sl-color-text`, `--sl-color-text-accent`, `--sl-color-accent`, `--sl-color-hairline*`) apontando
+  pros tokens já existentes (`--paper`, `--ink`, `--ink-soft`, `--passed`), tanto pro bloco escuro
+  (`:root`, que é o padrão do Starlight) quanto pro claro (`:root[data-theme='light']` — mesmo seletor
+  que o próprio Starlight usa, e que já é a chave que `ThemeToggle.astro`/`starlight-theme` no
+  `localStorage` já controlam desde a Fase 1, sem precisar de nenhuma ponte nova). Sem `@layer` nessas
+  regras — CSS sem camada sempre vence sobre o `@layer starlight.base` que o Starlight usa, então a
+  sobrescrita funciona por especificidade de cascata simples, sem precisar competir em especificidade de
+  seletor.
+- **Fontes do site também em `customCss`** — as importações Fontsource (`@fontsource-variable/archivo/standard.css`,
+  `@fontsource/newsreader/400.css`, `@fontsource/jetbrains-mono/400.css`) hoje só acontecem dentro de
+  `BaseLayout.astro`, que as páginas do Starlight não usam — precisam ser listadas também no array
+  `customCss` do `astro.config.mjs` pra carregar dentro do contexto do Starlight.
 - **`src/components/StarlightLanguageSelect.astro`** (ou nome equivalente) — substitui o seletor nativo
-  do Starlight, calculando o link pt↔en por reescrita de path (`/docs/...` ↔ `/docs/pt/...`), já que
-  `/docs` é sempre espelhado 1:1 entre os dois idiomas (diferente de `/projects/[slug]`, que precisou do
-  `translationKey`/`resolveAltLocaleHref` na Fase 3 por causa de slugs divergentes — aqui não há esse
-  problema, os slugs de doc são os mesmos nos dois idiomas).
+  do Starlight, calculando o link pt↔en por reescrita de path (`/docs/...` ↔ `/docs/pt/...`) a partir de
+  `Astro.url.pathname`, já que `/docs` é sempre espelhado 1:1 entre os dois idiomas (diferente de
+  `/projects/[slug]`, que precisou do `translationKey`/`resolveAltLocaleHref` na Fase 3 por causa de
+  slugs divergentes — aqui não há esse problema). Renderiza dois links de texto simples ("pt"/"en"),
+  mesmo padrão visual do `Header.astro` do site principal, em vez do `<select>` nativo do Starlight —
+  consistência visual sem precisar reconstruir o dropdown nativo.
 - **Link pra `/docs`** em `Header.astro` (ou onde fizer mais sentido visualmente) — fecha o gap de
   cobertura do crawler/a11y descrito acima.
 - **Nenhum conteúdo novo nesta fase** além do que já existe (a página placeholder de `/docs`) — os
