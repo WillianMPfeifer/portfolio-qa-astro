@@ -11,9 +11,9 @@ export default defineConfig({
         pt: { label: 'Português', lang: 'pt' },
       },
       sidebar: [
-        { label: 'Web', items: [{ autogenerate: { directory: 'web' } }] },
-        { label: 'Mobile', items: [{ autogenerate: { directory: 'mobile' } }] },
-        { label: 'Processo', items: [{ autogenerate: { directory: 'processo' } }] },
+        { label: 'Web', items: [{ autogenerate: { directory: 'docs/web' } }] },
+        { label: 'Mobile', items: [{ autogenerate: { directory: 'docs/mobile' } }] },
+        { label: 'Processo', items: [{ autogenerate: { directory: 'docs/processo' } }] },
       ],
       customCss: [
         './src/styles/tokens.css',
