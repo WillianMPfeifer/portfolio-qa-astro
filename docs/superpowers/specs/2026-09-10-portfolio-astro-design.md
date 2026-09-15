@@ -866,9 +866,60 @@ depois dessa fase corrigir o header/tokens delas.
   que a pasta exista antes do primeiro arquivo).
 
 ### Fase 7 — Fechamento
-`/notes`, `/cv`, Open Graph por página, sitemap, RSS, `robots.txt`, favicon.
+`/notes`, `/cv`, Open Graph por página, sitemap, RSS, `robots.txt`, favicon, deploy real no Cloudflare
+Pages.
 
-*Aceite:* Lighthouse ≥ 95 nas quatro categorias, zero violação séria no axe.
+*Aceite:* Lighthouse ≥ 95 nas quatro categorias contra o site publicado de verdade, zero violação séria
+no axe, sitemap/RSS/OG funcionando com URL real (não placeholder), site acessível publicamente.
+
+#### 6.7.1 Decisões de brainstorming (2026-09-15)
+
+**Deploy real entra no escopo desta fase.** O spec original (§2.1) deixava Cloudflare Pages/domínio como
+decisão futura, sem conta nem domínio comprado. Como esta é a fase de fechamento e o objetivo do site é
+ser mostrado a recrutadores, adiar o deploy pra depois não fazia sentido — sitemap, Open Graph e RSS
+também precisam de uma URL canônica real (`site` em `astro.config.mjs`) pra funcionar de verdade, não só
+de código. Decisão: criar o projeto no Cloudflare Pages e configurar deploy automático via GitHub
+Actions (Wrangler), publicando no subdomínio padrão `*.pages.dev` (sem domínio customizado por
+enquanto — continua fora do escopo). **Divisão de trabalho clara:** criar a conta/projeto Cloudflare e
+gerar as credenciais (API Token, Account ID) exige login do autor — isso é feito por ele, com
+orientação passo a passo; a implementação cuida do workflow de CI/deploy e da configuração do projeto
+Astro, tudo que não depende de acessar a conta pessoal do autor.
+
+**`/notes` e `/cv`: infraestrutura, sem conteúdo real, mesmo padrão da Fase 6.** O autor não tem notas
+nem currículo em PDF prontos ainda. `/notes` ganha listagem + página de detalhe lendo a collection
+`notes` (schema já existe desde a Fase 1: `title`/`description`/`date`/`lang`), vazia até o autor
+escrever algo — sem invenção de conteúdo de exemplo (regra de honestidade do §3 aplicada aqui também:
+lista vazia não renderiza nada, mesmo padrão de `FeaturedProjects.astro` quando não há projetos em
+destaque). `/cv` mostra um aviso claro de que o PDF ainda não foi adicionado, sem inventar dados de
+currículo.
+
+**Threshold do Lighthouse sobe pra ≥0.95, rígido, no CI.** Substitui o ≥0.9 da Fase 5 em
+`lighthouserc.json` — decisão consciente do autor de que vale o esforço extra de ajuste (meta tags,
+otimização de imagem/fonte) em vez de manter 90 como piso permanente. Se o primeiro build real contra o
+site publicado não bater 95 em alguma categoria, corrigir o que for necessário faz parte do trabalho
+desta fase, não é um bloqueio a reportar de volta.
+
+**Open Graph: uma imagem estática única pro site inteiro**, não geração dinâmica por página — alinhado
+com o minimalismo do resto do site (spec §4). `og:title`/`og:description` variam por página a partir do
+`<title>`/`description` que cada página já define; `og:image` é sempre a mesma imagem estática, com a
+identidade visual do spec (tokens `--paper`/`--ink`, tipografia mono).
+
+**Sitemap: reaproveita o que o Starlight já embute**, não instala `@astrojs/sitemap` separado. O warning
+de build já visto desde a Fase 1 ("The Sitemap integration requires the `site` astro.config option")
+confirma que o Starlight já gera sitemap internamente — só faltava a opção `site`. **Ponto a confirmar
+durante a implementação, não assumido aqui:** se esse sitemap embutido cobre o site inteiro (home,
+projects, quality, notes, cv) ou só as rotas do Starlight (`/docs`) — se for só `/docs`, a implementação
+precisa decidir entre instalar `@astrojs/sitemap` pro resto do site (dois sitemaps, um por mecanismo) ou
+outra abordagem, e voltar aqui pra documentar a decisão real.
+
+**RSS cobre `/projects`** (os case studies reais, conteúdo já existente desde a Fase 3) — não `/notes`
+(ainda vazio, sem conteúdo pra alimentar um feed com sentido agora). Um feed por idioma via
+`@astrojs/rss` (`/rss.xml` en, `/pt/rss.xml` pt), mesma convenção de idioma raiz/prefixo do resto do
+site.
+
+**Favicon: minimalista, baseado no design existente**, não uma imagem externa — um monograma ou símbolo
+ligado ao conceito Gherkin/qualidade do site, usando os tokens `--paper`/`--ink`/`--passed` já
+definidos, gerado como SVG/PNG durante a implementação, não fornecido pelo autor.
 
 ## 7. Conteúdo a escrever
 
