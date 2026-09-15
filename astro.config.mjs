@@ -15,6 +15,13 @@ export default defineConfig({
         { label: 'Mobile', items: [{ autogenerate: { directory: 'mobile' } }] },
         { label: 'Processo', items: [{ autogenerate: { directory: 'processo' } }] },
       ],
+      customCss: [
+        './src/styles/tokens.css',
+        './src/styles/starlight-tokens.css',
+        '@fontsource-variable/archivo/standard.css',
+        '@fontsource/newsreader/400.css',
+        '@fontsource/jetbrains-mono/400.css',
+      ],
     }),
   ],
 });
