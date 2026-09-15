@@ -11,6 +11,7 @@ export default defineConfig({
   // one worker at a time — site-health.feature and a11y.spec.ts each independently crawl the whole site;
   // running them concurrently just duplicates the crawl against the same preview server for no speed benefit on a site this small
   workers: 1,
+  reporter: [['list'], ['json', { outputFile: 'test-results/playwright-report.json' }]],
   webServer: {
     command: 'npm run build && npm run preview -- --port 4321',
     url: 'http://localhost:4321',
