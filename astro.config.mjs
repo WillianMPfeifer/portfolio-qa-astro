@@ -22,9 +22,6 @@ export default defineConfig({
         '@fontsource/newsreader/400.css',
         '@fontsource/jetbrains-mono/400.css',
       ],
-      components: {
-        LanguageSelect: './src/components/StarlightLanguageSelect.astro',
-      },
     }),
   ],
 });
