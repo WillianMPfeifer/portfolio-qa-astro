@@ -19,7 +19,10 @@ const enHref = altLocaleHref?.en ?? getRelativeLocaleUrl('en', pathWithoutLocale
 ---
 
 <header>
-  <a href={getRelativeLocaleUrl(currentLocale, '/')} class="site-name">Willian</a>
+  <div class="site-links">
+    <a href={getRelativeLocaleUrl(currentLocale, '/')} class="site-name">Willian</a>
+    <a href={getRelativeLocaleUrl(currentLocale, '/quality')}>quality</a>
+  </div>
   <nav aria-label="Language">
     <a href={ptHref} aria-current={currentLocale === 'pt' ? 'page' : undefined}>pt</a>
     <span aria-hidden="true">·</span>
@@ -38,10 +41,23 @@ const enHref = altLocaleHref?.en ?? getRelativeLocaleUrl('en', pathWithoutLocale
     border-bottom: 1px solid var(--ink-soft);
   }
 
+  .site-links {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
   .site-name {
     font-family: var(--font-display);
     font-weight: 700;
     color: var(--ink);
+    text-decoration: none;
+  }
+
+  .site-links a:not(.site-name) {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
     text-decoration: none;
   }
 

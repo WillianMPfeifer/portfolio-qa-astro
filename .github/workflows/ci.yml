@@ -44,7 +44,10 @@ jobs:
 
       - name: Find Playwright Chromium path for Lighthouse
         id: playwright-chrome-path
-        run: echo "path=$(find ~/.cache/ms-playwright -maxdepth 2 -iname 'chrome' -o -iname 'headless_shell' | head -n1)" >> "$GITHUB_OUTPUT"
+        run: |
+          p=$(find ~/.cache/ms-playwright -maxdepth 3 \( -iname 'chrome' -o -iname 'headless_shell' \) -type f | head -n1)
+          test -n "$p" || { echo "No Playwright Chromium binary found"; exit 1; }
+          echo "path=$p" >> "$GITHUB_OUTPUT"
 
       - name: Lighthouse CI
         id: lighthouse

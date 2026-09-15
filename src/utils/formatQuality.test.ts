@@ -17,6 +17,10 @@ describe('formatBundleSize', () => {
   it('formats megabytes with one decimal', () => {
     expect(formatBundleSize(2 * 1024 * 1024)).toBe('2.0 MB');
   });
+
+  it('returns the given label for null when provided', () => {
+    expect(formatBundleSize(null, 'unavailable')).toBe('unavailable');
+  });
 });
 
 describe('formatDate', () => {
@@ -26,6 +30,10 @@ describe('formatDate', () => {
 
   it('formats an ISO string as a readable UTC date/time', () => {
     expect(formatDate('2026-09-14T12:34:00.000Z')).toBe('2026-09-14 12:34 UTC');
+  });
+
+  it('returns the given label for null when provided', () => {
+    expect(formatDate(null, 'unavailable')).toBe('unavailable');
   });
 });
 
@@ -38,5 +46,9 @@ describe('formatScore', () => {
     expect(formatScore(0.95)).toBe('95');
     expect(formatScore(1)).toBe('100');
     expect(formatScore(0.904)).toBe('90');
+  });
+
+  it('returns the given label for null when provided', () => {
+    expect(formatScore(null, 'unavailable')).toBe('unavailable');
   });
 });

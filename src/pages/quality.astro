@@ -17,7 +17,7 @@ const scoreClass = (score: number) => (score >= LIGHTHOUSE_THRESHOLD ? 'value va
   <article class="quality">
     <h1>Quality</h1>
     <p class="meta">
-      Last run: {formatDate(quality.generatedAt)}
+      Last run: {formatDate(quality.generatedAt, 'unavailable')}
       {quality.runUrl && (
         <>
           {' — '}
@@ -43,7 +43,7 @@ const scoreClass = (score: number) => (score >= LIGHTHOUSE_THRESHOLD ? 'value va
           ))}
         </ul>
       ) : (
-        <p class="unavailable">indisponível</p>
+        <p class="unavailable">unavailable</p>
       )}
     </section>
 
@@ -54,7 +54,7 @@ const scoreClass = (score: number) => (score >= LIGHTHOUSE_THRESHOLD ? 'value va
           {quality.a11y.violations} violations across {quality.a11y.routesChecked} routes
         </p>
       ) : (
-        <p class="unavailable">indisponível</p>
+        <p class="unavailable">unavailable</p>
       )}
     </section>
 
@@ -62,19 +62,19 @@ const scoreClass = (score: number) => (score >= LIGHTHOUSE_THRESHOLD ? 'value va
       <h2 id="lighthouse-heading">Lighthouse</h2>
       {quality.lighthouse ? (
         <ul class="data-list">
-          <li><span class="label">Performance</span><span class={scoreClass(quality.lighthouse.performance)}>{formatScore(quality.lighthouse.performance)}</span></li>
-          <li><span class="label">Accessibility</span><span class={scoreClass(quality.lighthouse.accessibility)}>{formatScore(quality.lighthouse.accessibility)}</span></li>
-          <li><span class="label">Best Practices</span><span class={scoreClass(quality.lighthouse.bestPractices)}>{formatScore(quality.lighthouse.bestPractices)}</span></li>
-          <li><span class="label">SEO</span><span class={scoreClass(quality.lighthouse.seo)}>{formatScore(quality.lighthouse.seo)}</span></li>
+          <li><span class="label">Performance</span><span class={scoreClass(quality.lighthouse.performance)}>{formatScore(quality.lighthouse.performance, 'unavailable')}</span></li>
+          <li><span class="label">Accessibility</span><span class={scoreClass(quality.lighthouse.accessibility)}>{formatScore(quality.lighthouse.accessibility, 'unavailable')}</span></li>
+          <li><span class="label">Best Practices</span><span class={scoreClass(quality.lighthouse.bestPractices)}>{formatScore(quality.lighthouse.bestPractices, 'unavailable')}</span></li>
+          <li><span class="label">SEO</span><span class={scoreClass(quality.lighthouse.seo)}>{formatScore(quality.lighthouse.seo, 'unavailable')}</span></li>
         </ul>
       ) : (
-        <p class="unavailable">indisponível</p>
+        <p class="unavailable">unavailable</p>
       )}
     </section>
 
     <section aria-labelledby="bundle-heading">
       <h2 id="bundle-heading">Bundle size</h2>
-      <p>{formatBundleSize(quality.bundleSizeBytes)}</p>
+      <p>{formatBundleSize(quality.bundleSizeBytes, 'unavailable')}</p>
     </section>
   </article>
 </BaseLayout>
