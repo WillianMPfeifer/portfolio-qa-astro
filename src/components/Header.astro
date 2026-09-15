@@ -22,6 +22,7 @@ const enHref = altLocaleHref?.en ?? getRelativeLocaleUrl('en', pathWithoutLocale
   <div class="site-links">
     <a href={getRelativeLocaleUrl(currentLocale, '/')} class="site-name">Willian</a>
     <a href={getRelativeLocaleUrl(currentLocale, '/quality')}>quality</a>
+    <a href={currentLocale === 'pt' ? '/docs/pt/' : '/docs/'}>docs</a>
   </div>
   <nav aria-label="Language">
     <a href={ptHref} aria-current={currentLocale === 'pt' ? 'page' : undefined}>pt</a>
