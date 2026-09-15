@@ -1,0 +1,33 @@
+---
+const pathname = Astro.url.pathname;
+const isPortuguese = pathname === '/docs/pt' || pathname.startsWith('/docs/pt/');
+const enHref = isPortuguese ? pathname.replace(/^\/docs\/pt/, '/docs') || '/docs/' : pathname;
+const ptHref = isPortuguese ? pathname : pathname.replace(/^\/docs/, '/docs/pt') || '/docs/pt/';
+const currentLocale = isPortuguese ? 'pt' : 'en';
+---
+
+<nav aria-label="Language">
+  <a href={ptHref} aria-current={currentLocale === 'pt' ? 'page' : undefined}>pt</a>
+  <span aria-hidden="true">·</span>
+  <a href={enHref} aria-current={currentLocale === 'en' ? 'page' : undefined}>en</a>
+</nav>
+
+<style>
+  nav[aria-label='Language'] {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  nav[aria-label='Language'] a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  nav[aria-label='Language'] a[aria-current='page'] {
+    color: var(--ink);
+    font-weight: 700;
+  }
+</style>
