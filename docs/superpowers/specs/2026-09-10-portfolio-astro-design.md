@@ -704,7 +704,13 @@ artefato daquela etapa ausente), confirmar que o campo correspondente em `/quali
 em vez de a página sumir ou mostrar dado desatualizado, reverter.
 
 ### Fase 6 — Docs
-Migrar a Wiki do GitHub pro Starlight. Sidebar por tema, não por ordem de criação.
+Construir a infraestrutura de `/docs` (sidebar por tema, seletor de idioma corrigido, header/tokens
+compartilhados) pra receber conteúdo técnico real. **Correção de terminologia (2026-09-15):** a descrição
+original desta fase falava em "migrar a Wiki do GitHub" — não existe uma Wiki nativa do GitHub envolvida;
+o autor mantém um repositório separado (`qa-knowledge`) com anotações técnicas, mas decidiu não migrar
+nada de lá automaticamente. Em vez disso, o conteúdo real é escrito diretamente neste repositório, no seu
+próprio ritmo, seguindo a convenção de arquivo definida em §6.6.1 — esta fase entrega só a infraestrutura,
+sem depender de conteúdo pronto.
 
 **Pendências herdadas da Fase 1 (revisão final), a resolver nesta fase:**
 - **Sidebar explícito** (já previsto acima) também é o que evita o grupo "pt" aparecer aninhado dentro
@@ -721,7 +727,76 @@ Migrar a Wiki do GitHub pro Starlight. Sidebar por tema, não por ordem de cria�
   ['./src/styles/tokens.css'], components: { Header: './src/components/Header.astro' } })`.
 
 *Aceite:* busca funciona, sem link morto, seletor de idioma dentro de `/docs` leva pra tradução real (não
-pra página de fallback), `/docs` usa o mesmo header e os mesmos tokens visuais do site principal.
+pra página de fallback), `/docs` usa o mesmo header e os mesmos tokens visuais do site principal, sidebar
+organizada nos 3 grupos temáticos (§6.6.1), e adicionar um `.md` novo na pasta certa não exige tocar em
+nenhum outro arquivo.
+
+#### 6.6.1 Decisões de brainstorming (2026-09-15)
+
+**Sem conteúdo real nesta fase, de propósito.** O autor confirmou que não vai trazer o material do
+`qa-knowledge` automaticamente — vai escrever o conteúdo técnico direto neste repositório, no seu próprio
+ritmo, depois que a infraestrutura estiver pronta. Fase 6 entrega só a base técnica; nenhuma task depende
+de um documento real existir.
+
+**Estrutura de arquivos — 3 categorias temáticas, generalizando a convenção já definida em §5.7:**
+
+```
+src/content/docs/docs/
+  index.md              # landing de /docs (en)
+  web/<slug>.md          # categoria Web/Cypress
+  mobile/<slug>.md       # categoria Mobile/Appium
+  processo/<slug>.md     # categoria Processo de QA
+  pt/
+    index.md             # landing de /docs/pt (pt)
+    web/<slug>.md
+    mobile/<slug>.md
+    processo/<slug>.md
+```
+
+As 3 categorias espelham os dois case studies já publicados (Cypress, Appium) mais uma categoria de
+processo/gestão de QA (o material já listado em §7 — redesenho de processo, templates de teste, etc.).
+Todo o conteúdo pt continua sob um único `pt/` na raiz de `docs/docs/` (mesmo padrão já usado pro
+`index.md`), não uma pasta `pt/` por categoria — mantém o "aninhado uma vez só" que §5.3 já estabeleceu.
+Adicionar um documento novo é só criar o arquivo na pasta certa (e o espelho em `pt/<categoria>/` se for
+traduzir) — nenhuma outra edição, seguindo a mesma regra de manutenção do §5.7.
+
+**Sidebar gerada por diretório, não listada manualmente.** Cada grupo temático usa
+`starlight({ sidebar: [{ label: 'Web', autogenerate: { directory: 'web' } }, ...] })` em vez de enumerar
+páginas uma a uma — um `.md` novo na pasta certa aparece sozinho na sidebar, sem precisar editar
+`astro.config.mjs` de novo. **Ponto a verificar durante a implementação, não assumido aqui:** a forma
+exata de fazer esse `autogenerate` respeitar o locale correto (grupo "Web" mostrando `docs/web/*` no
+inglês e `docs/pt/web/*` no português, sem vazar um pro outro) depende do comportamento real da API de
+i18n do Starlight instalado (0.42.0) — a implementação deve confirmar isso empiricamente (rodar
+`npm run build` e inspecionar as rotas geradas, mesmo método já usado desde a Fase 1) e ajustar se a API
+real divergir do que está descrito aqui.
+
+**Cobertura do crawler/a11y.** Nenhuma página de `/docs` é alcançável hoje a partir de nenhum lugar
+navegável do site — é exatamente o gap que a revisão final da Fase 5 encontrou (o crawler da Fase 4 só
+descobre o que algo já existente linka). Esta fase precisa adicionar pelo menos um link real pra `/docs`
+em algum componente compartilhado (ex: `Header.astro`, mesmo padrão do link pra `/quality` adicionado na
+Fase 5) — sem isso, o portão de zero-tolerância de a11y continua nunca verificando essas páginas mesmo
+depois dessa fase corrigir o header/tokens delas.
+
+#### 6.6.2 Componentes e arquitetura
+
+- **`astro.config.mjs`** — `starlight({...})` ganha `sidebar: [...]` com os 3 grupos por `autogenerate`
+  (`web`, `mobile`, `processo`), `customCss: ['./src/styles/tokens.css']`, e
+  `components: { Header: '...', LanguageSelect: '...' }`.
+- **`src/components/StarlightHeader.astro`** (ou nome equivalente) — wrapper fino que reaproveita o
+  `Header.astro` do site principal dentro do contexto do Starlight (que passa props diferentes das
+  páginas normais do site) — a implementação decide o nome exato e a ponte necessária entre as duas
+  APIs de props durante a Fase 6.
+- **`src/components/StarlightLanguageSelect.astro`** (ou nome equivalente) — substitui o seletor nativo
+  do Starlight, calculando o link pt↔en por reescrita de path (`/docs/...` ↔ `/docs/pt/...`), já que
+  `/docs` é sempre espelhado 1:1 entre os dois idiomas (diferente de `/projects/[slug]`, que precisou do
+  `translationKey`/`resolveAltLocaleHref` na Fase 3 por causa de slugs divergentes — aqui não há esse
+  problema, os slugs de doc são os mesmos nos dois idiomas).
+- **Link pra `/docs`** em `Header.astro` (ou onde fizer mais sentido visualmente) — fecha o gap de
+  cobertura do crawler/a11y descrito acima.
+- **Nenhum conteúdo novo nesta fase** além do que já existe (a página placeholder de `/docs`) — os
+  slugs `web/`, `mobile/`, `processo/` só precisam existir como convenção documentada aqui; não é
+  necessário criar pastas vazias no repositório (Git não versiona diretório vazio, e Starlight não exige
+  que a pasta exista antes do primeiro arquivo).
 
 ### Fase 7 — Fechamento
 `/notes`, `/cv`, Open Graph por página, sitemap, RSS, `robots.txt`, favicon.
