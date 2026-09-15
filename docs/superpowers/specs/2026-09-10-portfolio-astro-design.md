@@ -611,6 +611,98 @@ Página `/quality` com os números, data do último run, link pro run no GitHub 
 
 *Aceite:* quebrar um teste de propósito → a página mostra falha, não some com o dado.
 
+#### 6.5.1 Decisões de brainstorming (2026-09-14)
+
+**Como o `quality.json` chega a um build de verdade, sem deploy configurado.** O site ainda não está
+publicado em lugar nenhum (spec §2.1 deixou isso como decisão futura). Sem um pipeline de deploy rodando
+`astro build` continuamente, "o próximo build lê o `quality.json`" (§5.6) precisaria de outro mecanismo.
+Decisão: o próprio workflow de CI, depois de rodar tudo, **commita o `quality.json` atualizado de volta
+no repositório** (commit de bot, mensagem `chore: atualiza quality.json [skip ci]`) — mas só quando o
+trigger for um push direto em `master`, nunca em Pull Request (commitar num branch de PR de terceiros ou
+mesmo do próprio autor seria estranho antes do merge, e semanticamente `/quality` deve refletir o estado
+publicado, não um estado em revisão). Qualquer build futuro — local, ou um deploy que vier a existir —
+já lê esse arquivo do próprio repositório. Usa o `GITHUB_TOKEN` padrão da Actions, que por design do
+GitHub não gera novo run a partir de um push feito por ele mesmo (sem risco de loop infinito mesmo sem o
+`[skip ci]`, que fica de qualquer forma como reforço explícito).
+
+**a11y: zero-tolerância confirmada, não "registra sem quebrar".** `tests/a11y.spec.ts` continua falhando
+o build se achar qualquer violação (comportamento inalterado desde a Fase 4). Consequência direta: o
+campo de a11y em `/quality`, quando aparece, é sempre "0 violações" — se não fosse zero, o pipeline já
+teria parado antes de gerar o relatório. Como `build-quality-report.ts` ainda precisa de um artefato pra
+ler mesmo numa execução bem-sucedida, `a11y.spec.ts` ganha uma escrita extra depois da asserção: um
+resumo (`test-results/a11y-summary.json` — rotas verificadas, contagem de violações) que só existe se o
+teste passou. Reforça a mensagem central do site (spec §3): qualidade é processo, não uma exceção que se
+tolera.
+
+**Lighthouse CI: threshold que quebra o CI, contra `dist/` estático, amostrado em duas rotas.** Rodar
+via `@lhci/cli` com `staticDistDir: 'dist'` (Astro já gera HTML estático; não precisa orquestrar um
+servidor de preview em paralelo ao do Playwright). Assertions: Performance, Acessibilidade, Best
+Practices e SEO ≥ 90 cada — mesma filosofia de zero-tolerância do a11y, e um piso defensável numa
+conversa técnica. Amostra: `/` e `/pt/` (as duas homes) como representativas do site — decisão de
+escopo pra manter o CI rápido; ampliar pra mais rotas fica em aberto pra quando fizer sentido (ex:
+quando `/docs` tiver conteúdo real na Fase 6).
+
+**Bundle size = tamanho total de `dist/`.** Soma bruta de tudo que `astro build` gera (HTML, CSS, JS,
+fontes) — mais representativo de "quanto o visitante baixa" do que só os assets processados em
+`dist/_astro`, e mais simples de calcular (não precisa filtrar por tipo de arquivo).
+
+**Trigger do workflow: push em `master` + Pull Requests.** Cobre tanto merge direto quanto o fluxo de
+PR (usado na Fase 4) — mostra o status de CI na tela do PR antes do merge. O passo de commitar
+`quality.json` de volta é o único condicionado a "só em push direto em `master`" (ver acima).
+
+#### 6.5.2 Componentes e arquitetura
+
+- **`.github/workflows/ci.yml`** — checkout → setup Node → `npm ci` → instalar browser do Playwright →
+  `npm run build` → `npm run test:unit` → `npm run test:e2e` (já cobre BDD + a11y) → Lighthouse CI →
+  `node scripts/build-quality-report.ts` → (só em push a `master`) commit + push do `quality.json`
+  atualizado.
+
+  **Nuance importante pro critério de aceite ("não some com o dado" quando um teste quebra):** se um
+  passo falhar, o comportamento padrão do GitHub Actions é parar o job ali — o que faria
+  `build-quality-report.ts` nunca rodar, e `/quality` ficaria com o dado antigo (do último run que
+  passou), silenciosamente desatualizado. Isso não é "mostrar a falha", é escondê-la. Correção: os
+  passos de `test:unit`/`test:e2e`/Lighthouse rodam com `continue-on-error: true`, cada um expondo seu
+  resultado (`outcome`) via `id`; `build-quality-report.ts` e o commit de volta rodam com `if:
+  always()`, lendo qualquer artefato que exista (o reporter JSON do Playwright grava mesmo quando um
+  cenário falha; o resumo de a11y só existe se a11y passou — uma falha ali vira `null`/"indisponível" de
+  verdade; o relatório do Lighthouse é escrito mesmo quando as assertions falham, então uma nota baixa
+  aparece como o score real, não como ausente). Um último passo do job verifica os `outcome`s
+  capturados e falha o job explicitamente se qualquer um não foi `success` — garante que o badge/status
+  do CI continua vermelho quando algo quebra, mesmo com os passos de relatório rodando por baixo.
+- **Reporter JSON do Playwright** — `playwright.config.ts` ganha `reporter: [['list'], ['json', {
+  outputFile: 'test-results/playwright-report.json' }]]`, mantendo a saída legível no terminal (`list`)
+  e adicionando a saída estruturada que `build-quality-report.ts` consome.
+- **`tests/a11y.spec.ts`** — depois de `expect(results.violations).toEqual([])`, escreve
+  `test-results/a11y-summary.json` com `{ routesChecked: number, violations: number }` (violations
+  sempre 0 nesse ponto, mas o campo existe pro pipeline não ter que assumir).
+- **`lighthouserc.json`** (raiz do projeto) — `collect.staticDistDir: 'dist'`, `collect.url` com `/` e
+  `/pt/`, `assert.assertions` com os 4 scores ≥ 0.9 cada.
+- **`scripts/build-quality-report.ts`** — separado em uma função pura testável (mesmo padrão de
+  `src/utils/projectList.ts`) que recebe os artefatos já parseados (resultado do Playwright, resumo de
+  a11y, resultado do Lighthouse, tamanho de bundle, metadados de commit/run) e retorna o objeto
+  `QualityReport` final; um wrapper fino faz leitura de arquivo, `process.env` (`GITHUB_SHA`,
+  `GITHUB_SERVER_URL`, `GITHUB_REPOSITORY`, `GITHUB_RUN_ID` pra montar a URL do run) e escreve
+  `src/data/quality.json`. Campo ausente (etapa não rodou, artefato não existe) vira `null` explícito no
+  JSON — nunca omitido silenciosamente nem preenchido com valor de exemplo (regra de honestidade, §3).
+- **`src/data/quality.json` inicial** — committado nesta fase com todos os campos em `null`/ausente,
+  pra a página `/quality` já nascer funcional (mostrando "indisponível" em tudo) antes do primeiro run
+  real de CI escrever dados de verdade.
+- **`src/pages/quality.astro` / `src/pages/pt/quality.astro`** — lê `src/data/quality.json` (import
+  estático, sem chamada em runtime — o site continua estático). Mostra: data/hora do último run, link
+  pro run no GitHub Actions, tabela de cenários por feature (passou/total), status de a11y ("0 violações
+  em N rotas" ou "indisponível"), os 4 scores do Lighthouse, tamanho do bundle formatado, links pros
+  `.feature` no GitHub. Cada bloco de dado renderiza "indisponível" (texto simples, sem cor de estado)
+  quando o campo correspondente do JSON é `null` — nunca esconde a seção inteira nem inventa um número.
+- **Layout visual** — reaproveita os tokens já estabelecidos (spec §4): `--passed`/`--failed` pros
+  estados de teste, `--font-mono` pros números/dados "de máquina", mesma régua de largura de leitura das
+  outras páginas. Sem componente novo de card ou dashboard — segue a mesma lista com divisória fina já
+  usada em `/projects`.
+
+*Aceite (procedimento de demonstração, não teste permanente):* quebrar um teste de propósito, rodar as
+etapas do pipeline localmente (`npm run test:e2e` falhando, então rodar `build-quality-report.ts` com o
+artefato daquela etapa ausente), confirmar que o campo correspondente em `/quality` vira "indisponível"
+em vez de a página sumir ou mostrar dado desatualizado, reverter.
+
 ### Fase 6 — Docs
 Migrar a Wiki do GitHub pro Starlight. Sidebar por tema, não por ordem de criação.
 
