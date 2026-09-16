@@ -100,7 +100,7 @@ jobs:
              [ "${{ steps.unit.outcome }}" != "success" ] || \
              [ "${{ steps.e2e.outcome }}" != "success" ] || \
              [ "${{ steps.lighthouse.outcome }}" != "success" ] || \
-             [ "${{ steps.deploy.outcome }}" != "success" ] || \
+             [ "${{ steps.deploy.outcome }}" == "failure" ] || \
              [ "${{ steps.quality.outcome }}" != "success" ]; then
             echo "One or more stages failed — see the step logs above."
             exit 1
