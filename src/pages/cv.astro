@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Willian — CV" description="Résumé — not published yet.">
+  <article class="cv">
+    <h1>CV</h1>
+    <p class="unavailable">The PDF résumé isn't published yet — check back soon.</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .cv {
+    padding: 1.5rem;
+    max-width: var(--measure);
+  }
+
+  .unavailable {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+</style>
