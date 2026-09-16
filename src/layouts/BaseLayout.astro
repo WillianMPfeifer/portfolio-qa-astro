@@ -21,6 +21,10 @@ const { title, description, altLocaleHref } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL('/og-image.png', Astro.site);
+
+const isPt = (Astro.currentLocale ?? 'en') === 'pt';
+const rssHref = isPt ? '/pt/rss.xml' : '/rss.xml';
+const rssTitle = isPt ? 'Willian — Feed RSS' : 'Willian — RSS Feed';
 ---
 
 <!doctype html>
@@ -32,12 +36,16 @@ const ogImageURL = new URL('/og-image.png', Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={rssTitle} href={rssHref} />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Willian — QA/SDET" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />

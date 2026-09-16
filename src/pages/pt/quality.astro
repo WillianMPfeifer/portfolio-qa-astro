@@ -9,7 +9,7 @@ const quality = qualityData as QualityReport;
 const featureFileUrl = (feature: string) =>
   `https://github.com/WillianMPfeifer/portfolio-qa-astro/blob/master/tests/features/${feature}.feature`;
 
-const LIGHTHOUSE_THRESHOLD = 0.9;
+const LIGHTHOUSE_THRESHOLD = 0.95;
 const scoreClass = (score: number) => (score >= LIGHTHOUSE_THRESHOLD ? 'value value--passed' : 'value value--failed');
 ---
 
