@@ -25,7 +25,7 @@ const { prev, next } = getAdjacentProjects(allProjects, 'en', project.id);
 const altLocaleHref = resolveAltLocaleHref(project, allProjects);
 ---
 
-<BaseLayout title={`Willian — ${project.data.title}`} altLocaleHref={altLocaleHref}>
+<BaseLayout title={`Willian — ${project.data.title}`} description={project.data.outcome} altLocaleHref={altLocaleHref}>
   <article class="case-study">
     <h1>{project.data.title}</h1>
     <p class="meta">

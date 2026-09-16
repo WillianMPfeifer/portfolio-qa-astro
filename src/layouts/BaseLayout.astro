@@ -13,10 +13,14 @@ import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
+  description: string;
   altLocaleHref?: { pt: string; en: string };
 }
 
-const { title, altLocaleHref } = Astro.props;
+const { title, description, altLocaleHref } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL('/og-image.png', Astro.site);
 ---
 
 <!doctype html>
@@ -25,6 +29,21 @@ const { title, altLocaleHref } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
     <script is:inline>
       (function () {
         // Mesma chave de localStorage e mesma lógica que o ThemeProvider.astro do

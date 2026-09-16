@@ -1,0 +1,10 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#EDEFEE" />
+  <rect x="0" y="0" width="10" height="630" fill="#1F5F3F" />
+  <text x="80" y="260" font-family="monospace" font-size="72" font-weight="700" fill="#16211D">Willian</text>
+  <text x="80" y="330" font-family="monospace" font-size="40" fill="#5C6B66">QA / SDET</text>
+  <text x="80" y="420" font-family="monospace" font-size="28" fill="#1F5F3F">Feature: QA Engineer</text>
+  <text x="80" y="460" font-family="monospace" font-size="24" fill="#5C6B66">Given a team that already automates</text>
+  <text x="80" y="494" font-family="monospace" font-size="24" fill="#5C6B66">When it needs someone who understands the client</text>
+  <text x="80" y="528" font-family="monospace" font-size="24" fill="#5C6B66">Then that guy is me</text>
+</svg>

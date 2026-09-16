@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
+  site: 'https://portfolio-qa-astro.pages.dev',
   integrations: [
     starlight({
       title: 'Willian — Docs',
