@@ -56,6 +56,19 @@ jobs:
         env:
           CHROME_PATH: ${{ steps.playwright-chrome-path.outputs.path }}
 
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        if: |
+          github.event_name == 'push' && github.ref == 'refs/heads/master' &&
+          steps.build.outcome == 'success' && steps.unit.outcome == 'success' &&
+          steps.e2e.outcome == 'success' && steps.lighthouse.outcome == 'success'
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=portfolio-qa-astro
+
       - name: Build quality report
         id: quality
         if: always()
@@ -87,6 +100,7 @@ jobs:
              [ "${{ steps.unit.outcome }}" != "success" ] || \
              [ "${{ steps.e2e.outcome }}" != "success" ] || \
              [ "${{ steps.lighthouse.outcome }}" != "success" ] || \
+             [ "${{ steps.deploy.outcome }}" != "success" ] || \
              [ "${{ steps.quality.outcome }}" != "success" ]; then
             echo "One or more stages failed — see the step logs above."
             exit 1
