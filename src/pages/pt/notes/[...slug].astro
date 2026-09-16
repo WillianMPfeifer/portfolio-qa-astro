@@ -1,0 +1,48 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+}
+
+export async function getStaticPaths() {
+  const allNotes = await getCollection('notes');
+  const ptNotes = allNotes.filter((note) => note.data.lang === 'pt');
+  return ptNotes.map((note) => ({
+    params: { slug: note.id },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+---
+
+<BaseLayout title={`Willian — ${note.data.title}`} description={note.data.description}>
+  <article class="note">
+    <h1>{note.data.title}</h1>
+    <p class="meta">{note.data.date.toISOString().split('T')[0]}</p>
+    <div class="body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .note {
+    padding: 1.5rem;
+    max-width: var(--measure);
+  }
+
+  .meta {
+    font-family: var(--font-mono);
+    color: var(--ink-soft);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .body {
+    margin-top: 1.5rem;
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getNotesByLang } from '../../../utils/notesList';
+
+const allNotes = await getCollection('notes');
+const notes = getNotesByLang(allNotes, 'pt');
+---
+
+<BaseLayout title="Willian — Notas" description="Notas curtas sobre o que estou aprendendo e construindo fora do trabalho.">
+  <article class="notes">
+    <h1>Notas</h1>
+    {
+      notes.length > 0 ? (
+        <ul class="notes-list">
+          {notes.map((note) => (
+            <li>
+              <a href={`/pt/notes/${note.id}/`}>
+                <span class="title">{note.data.title}</span>
+                <span class="meta">{note.data.date.toISOString().split('T')[0]}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="unavailable">Nada publicado ainda.</p>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .notes {
+    padding: 1.5rem;
+    max-width: var(--measure);
+  }
+
+  .notes-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .notes-list li {
+    border-top: 1px solid var(--ink-soft);
+    padding: 1rem 0;
+  }
+
+  .notes-list li:last-child {
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .notes-list a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .title {
+    font-weight: 700;
+  }
+
+  .meta {
+    font-family: var(--font-mono);
+    color: var(--ink-soft);
+  }
+
+  .unavailable {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+</style>
