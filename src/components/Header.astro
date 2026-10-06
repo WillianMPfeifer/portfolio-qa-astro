@@ -1,6 +1,7 @@
 ---
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import ThemeToggle from './ThemeToggle.astro';
+import { home, type Locale } from '../data/home';
 
 interface Props {
   altLocaleHref?: { pt: string; en: string };
@@ -8,7 +9,8 @@ interface Props {
 
 const { altLocaleHref } = Astro.props;
 
-const currentLocale = Astro.currentLocale ?? 'en';
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale;
+const t = home[currentLocale].nav;
 const pathWithoutLocale =
   currentLocale === 'en'
     ? Astro.url.pathname
@@ -16,67 +18,55 @@ const pathWithoutLocale =
 
 const ptHref = altLocaleHref?.pt ?? getRelativeLocaleUrl('pt', pathWithoutLocale);
 const enHref = altLocaleHref?.en ?? getRelativeLocaleUrl('en', pathWithoutLocale);
+
+const navLinks = [
+  { label: t.projects, href: getRelativeLocaleUrl(currentLocale, '/projects/') },
+  { label: t.quality, href: getRelativeLocaleUrl(currentLocale, '/quality') },
+  { label: t.docs, href: getRelativeLocaleUrl(currentLocale, '/docs') },
+];
+
+const isActive = (href: string) => Astro.url.pathname.replace(/\/$/, '') === href.replace(/\/$/, '');
+const langLink = 'no-underline px-1.5 py-0.5 rounded text-ink-soft hover:text-ink';
 ---
 
-<header>
-  <div class="site-links">
-    <a href={getRelativeLocaleUrl(currentLocale, '/')} class="site-name">Willian</a>
-    <a href={getRelativeLocaleUrl(currentLocale, '/quality')}>quality</a>
-    <a href={getRelativeLocaleUrl(currentLocale, '/docs')}>docs</a>
+<header class="border-b border-line">
+  <div class="container-page flex flex-wrap items-center gap-x-6 gap-y-2 py-4">
+    <a href={getRelativeLocaleUrl(currentLocale, '/')} class="font-extrabold tracking-tight text-ink no-underline">
+      Willian Pfeifer
+    </a>
+    <nav aria-label="Site" class="order-last w-full sm:order-none sm:w-auto">
+      <ul class="flex gap-5 text-[0.95rem]">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                class="text-ink-soft no-underline hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="ml-auto flex items-center gap-3">
+      <nav aria-label={t.language} class="flex items-center font-mono text-xs">
+        <a
+          href={ptHref}
+          lang="pt-BR"
+          aria-current={currentLocale === 'pt' ? 'page' : undefined}
+          class:list={[langLink, 'aria-[current=page]:bg-surface aria-[current=page]:text-ink']}>pt</a
+        >
+        <a
+          href={enHref}
+          lang="en"
+          aria-current={currentLocale === 'en' ? 'page' : undefined}
+          class:list={[langLink, 'aria-[current=page]:bg-surface aria-[current=page]:text-ink']}>en</a
+        >
+      </nav>
+      <ThemeToggle label={t.themeToggle} />
+    </div>
   </div>
-  <nav aria-label="Language">
-    <a href={ptHref} aria-current={currentLocale === 'pt' ? 'page' : undefined}>pt</a>
-    <span aria-hidden="true">·</span>
-    <a href={enHref} aria-current={currentLocale === 'en' ? 'page' : undefined}>en</a>
-  </nav>
-  <ThemeToggle />
 </header>
-
-<style>
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--ink-soft);
-  }
-
-  .site-links {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-  }
-
-  .site-name {
-    font-family: var(--font-display);
-    font-weight: 700;
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .site-links a:not(.site-name) {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--ink-soft);
-    text-decoration: none;
-  }
-
-  nav[aria-label='Language'] {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-  }
-
-  nav[aria-label='Language'] a {
-    color: var(--ink-soft);
-    text-decoration: none;
-  }
-
-  nav[aria-label='Language'] a[aria-current='page'] {
-    color: var(--ink);
-    font-weight: 700;
-  }
-</style>

@@ -1,0 +1,42 @@
+---
+import { Picture } from 'astro:assets';
+import photo from '../../assets/willian.jpg';
+import { home, type Locale } from '../../data/home';
+import { links } from '../../data/links';
+
+const locale = (Astro.currentLocale ?? 'en') as Locale;
+const t = home[locale].hero;
+---
+
+<section class="container-page grid items-center gap-10 pt-12 pb-14 md:grid-cols-[1fr_minmax(0,340px)] md:gap-16 md:pt-20 md:pb-20">
+  <div>
+    <p class="flex items-center gap-2 text-sm font-medium text-ink-soft">
+      <span class="size-2 rounded-full bg-accent" aria-hidden="true"></span>
+      {t.status}
+    </p>
+    <h1 class="mt-4 text-[clamp(2.75rem,8vw,5.25rem)] leading-[0.95] tracking-[-0.04em]">{t.name}</h1>
+    <p class="mt-6 max-w-[58ch] text-lg text-ink sm:text-xl sm:leading-relaxed">{t.lead}</p>
+    <div class="mt-8 flex flex-wrap items-center gap-3">
+      <a class="btn btn-primary" href={`mailto:${links.email}`}>{t.emailCta}</a>
+      <a class="btn btn-ghost" href={links.cv} download>{t.cvCta}</a>
+      <a class="btn btn-ghost" href={links.linkedin}>LinkedIn</a>
+      <a class="btn btn-ghost" href={links.github}>GitHub</a>
+    </div>
+    <p class="mt-6 font-mono text-xs text-ink-soft">{t.location}</p>
+  </div>
+
+  <div class="mx-auto w-full max-w-[300px] md:max-w-none">
+    <Picture
+      src={photo}
+      alt={t.photoAlt}
+      width={680}
+      widths={[300, 480, 680]}
+      sizes="(min-width: 768px) 340px, 300px"
+      formats={['avif', 'webp']}
+      fallbackFormat="webp"
+      loading="eager"
+      fetchpriority="high"
+      class="aspect-[4/5] w-full rounded-lg object-cover object-[50%_35%] ring-1 ring-line"
+    />
+  </div>
+</section>

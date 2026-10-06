@@ -1,111 +1,15 @@
 ---
-import { getCollection, render } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import StackList from '../../../components/StackList.astro';
-import { getAdjacentProjects, projectHref, resolveAltLocaleHref } from '../../../utils/projectList';
-
-interface Props {
-  project: CollectionEntry<'projects'>;
-}
+import { getCollection } from 'astro:content';
+import CaseStudyPage from '../../../components/pages/CaseStudyPage.astro';
 
 export async function getStaticPaths() {
   const allProjects = await getCollection('projects');
-  const ptProjects = allProjects.filter((project) => project.data.lang === 'pt');
-  return ptProjects.map((project) => ({
-    params: { slug: project.id },
-    props: { project },
-  }));
+  return allProjects
+    .filter((project) => project.data.lang === 'pt')
+    .map((project) => ({ params: { slug: project.id }, props: { project } }));
 }
 
 const { project } = Astro.props;
-const { Content } = await render(project);
-const allProjects = await getCollection('projects');
-const { prev, next } = getAdjacentProjects(allProjects, 'pt', project.id);
-const altLocaleHref = resolveAltLocaleHref(project, allProjects);
 ---
 
-<BaseLayout title={`Willian — ${project.data.title}`} altLocaleHref={altLocaleHref}>
-  <article class="case-study">
-    <h1>{project.data.title}</h1>
-    <p class="meta">
-      {project.data.role}, {project.data.period}
-    </p>
-    <StackList stack={project.data.stack} />
-    <div class="body">
-      <Content />
-    </div>
-    <nav class="prev-next" aria-label="Navegação de projetos">
-      <div class="prev">
-        {
-          prev && (
-            <a href={projectHref(prev)}>
-              <span class="direction">Anterior</span>
-              <span class="title">{prev.data.title}</span>
-            </a>
-          )
-        }
-      </div>
-      <div class="next">
-        {
-          next && (
-            <a href={projectHref(next)}>
-              <span class="direction">Próximo</span>
-              <span class="title">{next.data.title}</span>
-            </a>
-          )
-        }
-      </div>
-    </nav>
-  </article>
-</BaseLayout>
-
-<style>
-  .case-study {
-    padding: 1.5rem;
-    max-width: var(--measure);
-  }
-
-  .meta {
-    color: var(--ink-soft);
-    margin: 0.5rem 0 1rem;
-  }
-
-  .body {
-    margin-top: 1.5rem;
-  }
-
-  .body :global(h2) {
-    margin-top: 2rem;
-  }
-
-  .prev-next {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--ink-soft);
-  }
-
-  .prev-next a {
-    display: flex;
-    flex-direction: column;
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .next {
-    text-align: right;
-  }
-
-  .next a {
-    align-items: flex-end;
-  }
-
-  .direction {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--ink-soft);
-  }
-</style>
+<CaseStudyPage project={project} />

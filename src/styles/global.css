@@ -1,0 +1,116 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/* Expõe os tokens como classes do Tailwind: bg-paper, text-ink-soft, border-line, font-mono... */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-honey: var(--honey);
+  --color-passed: var(--passed);
+  --color-failed: var(--failed);
+  --color-band: var(--band);
+  --color-band-ink: var(--band-ink);
+  --color-band-soft: var(--band-soft);
+  --color-band-honey: var(--band-honey);
+  --color-band-passed: var(--band-passed);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-extrabold text-ink;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  a {
+    @apply text-accent underline decoration-1 underline-offset-[0.2em];
+  }
+
+  a:hover {
+    @apply decoration-2;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  ::selection {
+    @apply bg-accent text-accent-ink;
+  }
+}
+
+@layer components {
+  /* Largura padrão das seções. Mudou aqui, mudou no site inteiro. */
+  .container-page {
+    @apply mx-auto w-full max-w-[1120px] px-4 sm:px-6;
+  }
+
+  /* Botões: use sempre "btn" + uma variante. Ex.: class="btn btn-primary" */
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-md border px-4 py-2.5 text-[0.95rem] font-semibold no-underline transition-colors;
+  }
+
+  .btn-primary {
+    @apply border-accent bg-accent text-accent-ink hover:opacity-90;
+  }
+
+  .btn-ghost {
+    @apply border-line text-ink hover:border-ink;
+  }
+
+  /* Rótulo de seção: pequeno, em mono, cor de texto secundário */
+  .section-label {
+    @apply font-mono text-xs text-ink-soft;
+  }
+
+  /* Texto corrido dos case studies (markdown) */
+  .prose-case h2 {
+    @apply mt-10 mb-3 text-2xl;
+  }
+
+  .prose-case p,
+  .prose-case ul,
+  .prose-case ol {
+    @apply mb-4 text-[1.0625rem];
+  }
+
+  .prose-case ul {
+    @apply list-disc pl-6;
+  }
+
+  .prose-case ol {
+    @apply list-decimal pl-6;
+  }
+
+  .prose-case code {
+    @apply rounded bg-surface px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+
+  .prose-case pre {
+    @apply mb-4 overflow-x-auto rounded-md bg-surface p-4 font-mono text-sm;
+  }
+
+  .prose-case pre code {
+    @apply bg-transparent p-0;
+  }
+}
