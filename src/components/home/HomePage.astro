@@ -1,0 +1,25 @@
+---
+// A home inteira, igual nos dois idiomas. O texto vem de src/data/home.ts.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FeaturedProjects from '../FeaturedProjects.astro';
+import Hero from './Hero.astro';
+import ProofNumbers from './ProofNumbers.astro';
+import IncidentBand from './IncidentBand.astro';
+import Beyond from './Beyond.astro';
+import JourneyAndTools from './JourneyAndTools.astro';
+import Contact from './Contact.astro';
+import { home, type Locale } from '../../data/home';
+
+const locale = (Astro.currentLocale ?? 'en') as Locale;
+const { meta } = home[locale];
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <Hero />
+  <ProofNumbers />
+  <IncidentBand />
+  <FeaturedProjects />
+  <Beyond />
+  <JourneyAndTools />
+  <Contact />
+</BaseLayout>

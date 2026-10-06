@@ -63,4 +63,18 @@ describe('crawlSite', () => {
     expect(brokenLink?.ok).toBe(false);
     expect(result.links.some((link) => link.href.includes('external.example'))).toBe(false);
   });
+
+  it('checks file links like a PDF without navigating to them as pages', async () => {
+    const baseUrl = 'http://localhost:4321';
+    const page = createFakePage({
+      '/': { status: 200, hrefs: ['/cv/resume.pdf', '/missing.pdf'] },
+      '/cv/resume.pdf': { status: 200, hrefs: [] },
+    });
+
+    const result = await crawlSite(page as any, baseUrl);
+
+    expect(result.routes.map((route) => route.path)).toEqual(['/']);
+    expect(result.links.find((link) => link.href === '/cv/resume.pdf')?.ok).toBe(true);
+    expect(result.links.find((link) => link.href === '/missing.pdf')?.ok).toBe(false);
+  });
 });

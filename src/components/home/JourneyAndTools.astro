@@ -1,0 +1,50 @@
+---
+import { home, type Locale } from '../../data/home';
+import { links } from '../../data/links';
+
+const locale = (Astro.currentLocale ?? 'en') as Locale;
+const journey = home[locale].journey;
+const tools = home[locale].tools;
+---
+
+<div class="container-page grid gap-16 py-16 md:py-20 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14">
+  <section aria-labelledby="journey-heading">
+    <p class="section-label">{journey.label}</p>
+    <h2 id="journey-heading" class="mt-3 text-[clamp(1.6rem,3.5vw,2.25rem)]">{journey.title}</h2>
+    <p class="mt-4 text-ink-soft">{journey.intro}</p>
+    <ol class="mt-8">
+      {
+        journey.items.map((item) => (
+          <li class="grid gap-1 border-t border-line py-4 sm:grid-cols-[11rem_1fr] sm:gap-6">
+            <span class="pt-1 font-mono text-[0.72rem] text-ink-soft">{item.period}</span>
+            <div>
+              <p class="font-bold leading-snug">{item.role}</p>
+              <p class="text-[0.95rem] text-ink-soft">{item.place}</p>
+              <p class="mt-1.5 text-[0.95rem]">{item.detail}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section aria-labelledby="tools-heading">
+    <p class="section-label">{tools.label}</p>
+    <h2 id="tools-heading" class="mt-3 text-[clamp(1.6rem,3.5vw,2.25rem)]">{tools.title}</h2>
+    <dl class="mt-8">
+      {
+        tools.groups.map((group) => (
+          <div class="border-t border-line py-4">
+            <dt class="font-mono text-[0.72rem] text-ink-soft">{group.name}</dt>
+            <dd class="mt-1.5 leading-relaxed">{group.items.join(', ')}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <h3 class="mt-8 text-lg">{tools.certsTitle}</h3>
+    <ul class="mt-3 space-y-1 text-[0.95rem]">
+      {tools.certs.map((cert) => <li>{cert}</li>)}
+    </ul>
+    <a href={links.credly} class="mt-3 inline-block text-sm font-semibold">{tools.certsLink}</a>
+  </section>
+</div>

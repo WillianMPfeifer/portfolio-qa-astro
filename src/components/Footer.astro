@@ -1,45 +1,34 @@
 ---
-const links = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/willian-menegazzo-pfeifer-22a62a2b4' },
-  { label: 'Email', href: 'mailto:zepfeiferwillian@gmail.com' },
-  { label: 'GitHub', href: 'https://github.com/WillianMPfeifer' },
-  { label: 'Credly', href: 'https://www.credly.com/users/willian-menegazzo-pfeifer' },
+import { home, type Locale } from '../data/home';
+import { links } from '../data/links';
+
+const locale = (Astro.currentLocale ?? 'en') as Locale;
+const t = home[locale].footer;
+
+const profileLinks = [
+  { label: 'LinkedIn', href: links.linkedin },
+  { label: 'Email', href: `mailto:${links.email}` },
+  { label: 'GitHub', href: links.github },
+  { label: 'Credly', href: links.credly },
 ];
 ---
 
-<footer>
-  <ul>
-    {
-      links.map((link) => (
-        <li>
-          <a href={link.href}>{link.label}</a>
-        </li>
-      ))
-    }
-  </ul>
+<footer class="border-t border-line">
+  <div class="container-page flex flex-col gap-3 py-6 text-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between">
+    <p>
+      Willian Pfeifer, {new Date().getFullYear()}. {t.madeWith}{' '}
+      <a href={links.repo} class="text-ink-soft hover:text-ink">{t.source}</a>
+    </p>
+    <ul class="flex flex-wrap gap-4">
+      {
+        profileLinks.map((link) => (
+          <li>
+            <a href={link.href} class="text-ink-soft no-underline hover:text-ink hover:underline">
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </footer>
-
-<style>
-  footer {
-    border-top: 1px solid var(--ink-soft);
-    padding: 1.5rem;
-  }
-
-  ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  a {
-    color: var(--ink-soft);
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: var(--ink);
-  }
-</style>
