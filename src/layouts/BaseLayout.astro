@@ -1,31 +1,31 @@
 ---
-// NOTA: o brief original (Step 5) apontava para '@fontsource-variable/archivo/full.css', mas esse
-// arquivo não existe no pacote instalado (versão 5.3.0). O pacote expõe os arquivos por eixo de
-// variação (wght.css, wdth.css, ...) e um arquivo combinado chamado 'standard.css', que é o
-// equivalente à fonte variável completa (eixos wght 100-900 e wdth/font-stretch 62%-125%) — é esse
-// arquivo que tokens.css precisa, já que h1/h2/h3 usam font-variation-settings: 'wdth' 125.
-import '@fontsource-variable/archivo/standard.css';
-import '@fontsource/newsreader/400.css';
-import '@fontsource/jetbrains-mono/400.css';
-import '../styles/tokens.css';
+import '@fontsource-variable/schibsted-grotesk/wght.css';
+import '@fontsource-variable/martian-mono/wght.css';
+import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
+  description?: string;
   altLocaleHref?: { pt: string; en: string };
 }
 
-const { title, altLocaleHref } = Astro.props;
+const { title, description, altLocaleHref } = Astro.props;
 ---
 
 <!doctype html>
-<html lang={Astro.currentLocale ?? 'en'}>
+<html lang={Astro.currentLocale === 'pt' ? 'pt-BR' : 'en'}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
     <script is:inline>
+      document.documentElement.classList.add('js');
       (function () {
         // Mesma chave de localStorage e mesma lógica que o ThemeProvider.astro do
         // Starlight, para o tema ficar sincronizado entre o site principal e /docs.
@@ -36,9 +36,9 @@ const { title, altLocaleHref } = Astro.props;
       })();
     </script>
   </head>
-  <body>
+  <body class="flex min-h-screen flex-col">
     <Header altLocaleHref={altLocaleHref} />
-    <main>
+    <main class="flex-1">
       <slot />
     </main>
     <Footer />

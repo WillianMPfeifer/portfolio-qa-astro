@@ -35,6 +35,8 @@ export interface QualityReport {
   a11y: A11ySummary | null;
   lighthouse: LighthouseScores | null;
   bundleSizeBytes: number | null;
+  /** O que o navegador baixa ao abrir a home (audit total-byte-weight do Lighthouse). */
+  pageWeightBytes: number | null;
 }
 
 interface PWTestResult {
@@ -106,6 +108,18 @@ export function averageLighthouseScores(entries: LighthouseScores[]): Lighthouse
   };
 }
 
+export interface LighthouseResult {
+  audits: Record<string, { numericValue?: number } | undefined>;
+}
+
+export function averagePageWeightBytes(results: LighthouseResult[]): number | null {
+  const weights = results
+    .map((result) => result.audits['total-byte-weight']?.numericValue)
+    .filter((value): value is number => typeof value === 'number');
+  if (weights.length === 0) return null;
+  return Math.round(weights.reduce((sum, value) => sum + value, 0) / weights.length);
+}
+
 export interface BuildQualityReportInputs {
   generatedAt: string;
   runUrl: string | null;
@@ -114,6 +128,7 @@ export interface BuildQualityReportInputs {
   a11ySummary: A11ySummary | null;
   lighthouseScores: LighthouseScores | null;
   bundleSizeBytes: number | null;
+  pageWeightBytes: number | null;
 }
 
 export function buildQualityReport(inputs: BuildQualityReportInputs): QualityReport {
@@ -125,6 +140,7 @@ export function buildQualityReport(inputs: BuildQualityReportInputs): QualityRep
     a11y: inputs.a11ySummary,
     lighthouse: inputs.lighthouseScores,
     bundleSizeBytes: inputs.bundleSizeBytes,
+    pageWeightBytes: inputs.pageWeightBytes,
   };
 }
 
@@ -139,7 +155,20 @@ function readJsonIfExists<T>(filePath: string): T | null {
 
 interface LighthouseManifestEntry {
   isRepresentativeRun: boolean;
+  jsonPath: string;
   summary: Record<string, number>;
+}
+
+function readLighthousePageWeight(manifestPath: string): number | null {
+  const manifest = readJsonIfExists<LighthouseManifestEntry[]>(manifestPath);
+  if (!manifest) return null;
+
+  const results = manifest
+    .filter((entry) => entry.isRepresentativeRun)
+    .map((entry) => readJsonIfExists<LighthouseResult>(entry.jsonPath))
+    .filter((result): result is LighthouseResult => result !== null);
+
+  return averagePageWeightBytes(results);
 }
 
 function readLighthouseScores(manifestPath: string): LighthouseScores | null {
@@ -166,6 +195,7 @@ function main(): void {
   const a11ySummary = readJsonIfExists<A11ySummary>(path.join('test-results', 'a11y-summary.json'));
 
   const lighthouseScores = readLighthouseScores(path.join('.lighthouseci', 'manifest.json'));
+  const pageWeightBytes = readLighthousePageWeight(path.join('.lighthouseci', 'manifest.json'));
 
   const bundleSizeBytes = fs.existsSync('dist') ? getDirectorySizeBytes('dist') : null;
 
@@ -182,6 +212,7 @@ function main(): void {
     a11ySummary,
     lighthouseScores,
     bundleSizeBytes,
+    pageWeightBytes,
   });
 
   fs.mkdirSync(path.join('src', 'data'), { recursive: true });

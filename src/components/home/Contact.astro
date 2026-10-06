@@ -1,0 +1,55 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import type { QualityReport } from '../../../scripts/build-quality-report';
+import qualityData from '../../data/quality.json';
+import { formatScore } from '../../utils/formatQuality';
+import { home, type Locale } from '../../data/home';
+import { links } from '../../data/links';
+
+const locale = (Astro.currentLocale ?? 'en') as Locale;
+const t = home[locale].contact;
+const quality = qualityData as QualityReport;
+
+// A linha "este site também é testado" só aparece se o CI gerou os três números.
+const qualityLine =
+  quality.playwright && quality.a11y && quality.lighthouse
+    ? t.qualityLine({
+        passed: quality.playwright.passed,
+        total: quality.playwright.total,
+        violations: quality.a11y.violations,
+        routes: quality.a11y.routesChecked,
+        performance: formatScore(quality.lighthouse.performance),
+      })
+    : null;
+---
+
+<section class="border-t border-line" aria-labelledby="contact-heading">
+  <div class="container-page py-16 md:py-24">
+    <p class="section-label">{t.label}</p>
+    <h2 id="contact-heading" class="mt-3 text-[clamp(2.25rem,6vw,3.75rem)] tracking-[-0.035em]">{t.title}</h2>
+    <p class="mt-4 max-w-[52ch] text-lg text-ink-soft">{t.body}</p>
+    <a
+      href={`mailto:${links.email}`}
+      class="mt-6 inline-block text-[clamp(1.1rem,3.2vw,1.75rem)] font-bold break-all text-accent"
+    >
+      {links.email}
+    </a>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a class="btn btn-ghost" href={links.whatsapp}>WhatsApp</a>
+      <a class="btn btn-ghost" href={links.linkedin}>LinkedIn</a>
+      <a class="btn btn-ghost" href={links.cv} download>{home[locale].hero.cvCta}</a>
+      <a class="btn btn-ghost" href={links.github}>GitHub</a>
+      <a class="btn btn-ghost" href={links.credly}>Credly</a>
+    </div>
+    {
+      qualityLine && (
+        <p class="mt-12 flex max-w-[70ch] flex-wrap gap-x-2 border-l-2 border-accent pl-4 text-sm text-ink-soft">
+          <span>{qualityLine}</span>
+          <a href={getRelativeLocaleUrl(locale, '/quality')} class="font-semibold">
+            {t.qualityLink}
+          </a>
+        </p>
+      )
+    }
+  </div>
+</section>

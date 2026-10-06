@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildQualityReport, flattenPlaywrightReport, averageLighthouseScores } from './build-quality-report';
+import {
+  buildQualityReport,
+  flattenPlaywrightReport,
+  averageLighthouseScores,
+  averagePageWeightBytes,
+} from './build-quality-report';
 
 describe('flattenPlaywrightReport', () => {
   it('groups specs by feature file and counts passed vs total', () => {
@@ -55,6 +60,21 @@ describe('averageLighthouseScores', () => {
   });
 });
 
+describe('averagePageWeightBytes', () => {
+  it('averages the total-byte-weight audit across Lighthouse results, rounded to whole bytes', () => {
+    const result = averagePageWeightBytes([
+      { audits: { 'total-byte-weight': { numericValue: 132000 } } },
+      { audits: { 'total-byte-weight': { numericValue: 132001 } } },
+    ]);
+    expect(result).toBe(132001);
+  });
+
+  it('ignores results without the audit and returns null when none have it', () => {
+    expect(averagePageWeightBytes([{ audits: {} }])).toBeNull();
+    expect(averagePageWeightBytes([])).toBeNull();
+  });
+});
+
 describe('buildQualityReport', () => {
   it('carries every field through when all inputs are present', () => {
     const report = buildQualityReport({
@@ -65,6 +85,7 @@ describe('buildQualityReport', () => {
       a11ySummary: { routesChecked: 8, violations: 0 },
       lighthouseScores: { performance: 0.95, accessibility: 1, bestPractices: 0.9, seo: 1 },
       bundleSizeBytes: 204800,
+      pageWeightBytes: 132096,
     });
 
     expect(report).toEqual({
@@ -75,6 +96,7 @@ describe('buildQualityReport', () => {
       a11y: { routesChecked: 8, violations: 0 },
       lighthouse: { performance: 0.95, accessibility: 1, bestPractices: 0.9, seo: 1 },
       bundleSizeBytes: 204800,
+      pageWeightBytes: 132096,
     });
   });
 
@@ -87,11 +109,13 @@ describe('buildQualityReport', () => {
       a11ySummary: null,
       lighthouseScores: null,
       bundleSizeBytes: null,
+      pageWeightBytes: null,
     });
 
     expect(Object.keys(report).sort()).toEqual(
-      ['a11y', 'bundleSizeBytes', 'commitSha', 'generatedAt', 'lighthouse', 'playwright', 'runUrl'].sort(),
+      ['a11y', 'bundleSizeBytes', 'commitSha', 'generatedAt', 'lighthouse', 'pageWeightBytes', 'playwright', 'runUrl'].sort(),
     );
+    expect(report.pageWeightBytes).toBeNull();
     expect(report.playwright).toBeNull();
     expect(report.a11y).toBeNull();
     expect(report.lighthouse).toBeNull();

@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import type { QualityReport } from '../../../scripts/build-quality-report';
+import qualityData from '../../data/quality.json';
+import { formatBundleSize, formatDate, formatScore } from '../../utils/formatQuality';
+import type { Locale } from '../../data/home';
+import { ui } from '../../data/ui';
+
+const locale = (Astro.currentLocale ?? 'en') as Locale;
+const t = ui[locale].quality;
+const quality = qualityData as QualityReport;
+
+const featureFileUrl = (feature: string) =>
+  `https://github.com/WillianMPfeifer/portfolio-qa-astro/blob/master/tests/features/${feature}.feature`;
+
+const LIGHTHOUSE_THRESHOLD = 0.9;
+const stateClass = (ok: boolean) => (ok ? 'text-passed' : 'text-failed');
+const lighthouseRows = quality.lighthouse
+  ? [
+      { label: 'Performance', score: quality.lighthouse.performance },
+      { label: 'Accessibility', score: quality.lighthouse.accessibility },
+      { label: t.bestPractices, score: quality.lighthouse.bestPractices },
+      { label: 'SEO', score: quality.lighthouse.seo },
+    ]
+  : null;
+
+const card = 'rounded-lg border border-line p-5 sm:p-6';
+const cardTitle = 'text-lg';
+const row = 'flex items-baseline justify-between gap-4 border-t border-line py-2.5 first:border-t-0';
+---
+
+<BaseLayout title={`Willian Pfeifer — ${t.title}`}>
+  <article class="container-page py-12 md:py-16">
+    <h1 class="text-[clamp(2.25rem,6vw,3.5rem)]">{t.title}</h1>
+    <p class="mt-4 max-w-[62ch] text-lg text-ink-soft">{t.intro}</p>
+    <p class="mt-4 font-mono text-xs text-ink-soft">
+      {t.lastRun}: {formatDate(quality.generatedAt, t.unavailable)}
+      {
+        quality.runUrl && (
+          <>
+            {' — '}
+            <a href={quality.runUrl}>{t.viewRun}</a>
+          </>
+        )
+      }
+    </p>
+
+    <div class="mt-10 grid gap-5 md:grid-cols-2">
+      <section class={card} aria-labelledby="scenarios-heading">
+        <h2 id="scenarios-heading" class={cardTitle}>{t.scenarios}</h2>
+        {
+          quality.playwright ? (
+            <ul class="mt-3 font-mono text-sm">
+              {quality.playwright.scenarios.map((scenario) => (
+                <li class={row}>
+                  <span>
+                    {scenario.feature === 'a11y' ? (
+                      scenario.feature
+                    ) : (
+                      <a href={featureFileUrl(scenario.feature)}>{scenario.feature}.feature</a>
+                    )}
+                  </span>
+                  <span class={`font-semibold ${stateClass(scenario.passed === scenario.total)}`}>
+                    {scenario.passed}/{scenario.total}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-3 text-ink-soft">{t.unavailable}</p>
+          )
+        }
+      </section>
+
+      <section class={card} aria-labelledby="lighthouse-heading">
+        <h2 id="lighthouse-heading" class={cardTitle}>{t.lighthouse}</h2>
+        {
+          lighthouseRows ? (
+            <ul class="mt-3 font-mono text-sm">
+              {lighthouseRows.map((item) => (
+                <li class={row}>
+                  <span>{item.label}</span>
+                  <span class={`font-semibold ${stateClass(item.score >= LIGHTHOUSE_THRESHOLD)}`}>
+                    {formatScore(item.score, t.unavailable)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-3 text-ink-soft">{t.unavailable}</p>
+          )
+        }
+      </section>
+
+      <section class={card} aria-labelledby="a11y-heading">
+        <h2 id="a11y-heading" class={cardTitle}>{t.a11y}</h2>
+        <p class="mt-3">
+          {quality.a11y ? t.a11yLine(quality.a11y.violations, quality.a11y.routesChecked) : t.unavailable}
+        </p>
+      </section>
+
+      <section class={card} aria-labelledby="size-heading">
+        <h2 id="size-heading" class={cardTitle}>{t.size}</h2>
+        <dl class="mt-3">
+          <div class="grid grid-cols-[1fr_auto] items-baseline gap-x-4">
+            <dt>{t.pageWeight}</dt>
+            <dd class="font-mono font-semibold">{formatBundleSize(quality.pageWeightBytes ?? null, t.unavailable)}</dd>
+            <dd class="col-span-2 mt-1 text-sm text-ink-soft">{t.pageWeightHint}</dd>
+          </div>
+          <div class="mt-4 grid grid-cols-[1fr_auto] items-baseline gap-x-4 border-t border-line pt-4">
+            <dt>{t.bundle}</dt>
+            <dd class="font-mono font-semibold">{formatBundleSize(quality.bundleSizeBytes, t.unavailable)}</dd>
+            <dd class="col-span-2 mt-1 text-sm text-ink-soft">{t.bundleHint}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </article>
+</BaseLayout>

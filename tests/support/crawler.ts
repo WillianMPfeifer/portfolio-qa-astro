@@ -20,6 +20,13 @@ export interface CrawlResult {
 
 const SKIPPED_HREF_PREFIXES = ['#', 'mailto:', 'tel:'];
 
+// Arquivos (PDF, imagem...) têm o link checado, mas não são abertos como página:
+// page.goto num PDF vira download e não tem HTML pra seguir.
+function isPagePath(pathname: string): boolean {
+  const lastSegment = pathname.split('/').pop() ?? '';
+  return !lastSegment.includes('.') || lastSegment.endsWith('.html');
+}
+
 export async function crawlSite(page: Page, baseUrl: string): Promise<CrawlResult> {
   const origin = new URL(baseUrl).origin;
   const visited = new Set<string>();
@@ -59,7 +66,7 @@ export async function crawlSite(page: Page, baseUrl: string): Promise<CrawlResul
       });
 
       const normalizedPath = resolved.pathname + resolved.search;
-      if (!visited.has(normalizedPath) && !queue.includes(normalizedPath)) {
+      if (isPagePath(resolved.pathname) && !visited.has(normalizedPath) && !queue.includes(normalizedPath)) {
         queue.push(normalizedPath);
       }
     }
