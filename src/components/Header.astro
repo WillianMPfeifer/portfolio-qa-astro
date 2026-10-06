@@ -11,10 +11,16 @@ const { altLocaleHref } = Astro.props;
 
 const currentLocale = (Astro.currentLocale ?? 'en') as Locale;
 const t = home[currentLocale].nav;
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pathname =
+  basePath && Astro.url.pathname.startsWith(basePath)
+    ? Astro.url.pathname.slice(basePath.length) || '/'
+    : Astro.url.pathname;
+
 const pathWithoutLocale =
   currentLocale === 'en'
-    ? Astro.url.pathname
-    : Astro.url.pathname.replace(new RegExp(`^/${currentLocale}(?=/|$)`), '') || '/';
+    ? pathname
+    : pathname.replace(new RegExp(`^/${currentLocale}(?=/|$)`), '') || '/';
 
 const ptHref = altLocaleHref?.pt ?? getRelativeLocaleUrl('pt', pathWithoutLocale);
 const enHref = altLocaleHref?.en ?? getRelativeLocaleUrl('en', pathWithoutLocale);

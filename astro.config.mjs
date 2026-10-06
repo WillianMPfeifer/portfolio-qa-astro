@@ -3,6 +3,8 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  site: 'https://willianmpfeifer.github.io',
+  base: '/portfolio-qa-astro',
   vite: {
     plugins: [tailwindcss()],
   },

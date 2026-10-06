@@ -23,7 +23,9 @@ export function getAdjacentProjects(
 }
 
 export function projectHref(entry: CollectionEntry<'projects'>): string {
-  return entry.data.lang === 'pt' ? `/pt/projects/${entry.id}/` : `/projects/${entry.id}/`;
+  const base = (import.meta.env?.BASE_URL ?? '/').replace(/\/$/, '');
+  const prefix = base ? `${base}/` : '/';
+  return entry.data.lang === 'pt' ? `${prefix}pt/projects/${entry.id}/` : `${prefix}projects/${entry.id}/`;
 }
 
 export function resolveAltLocaleHref(
