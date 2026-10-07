@@ -8,6 +8,7 @@ export const links = {
   whatsapp: 'https://wa.me/5555999866670',
   incidentPost: 'https://lnkd.in/p/dpubrEVM',
   anibem: 'https://anibemhospitalvet24h.com.br',
+  lavaCenter: 'https://willianmpfeifer.github.io/lava_center/',
   // Currículo em PDF (fica em public/cv/). Só existe em português por enquanto.
   cv: `${(import.meta.env?.BASE_URL ?? '/').replace(/\/$/, '')}/cv/willian-pfeifer-curriculo.pdf`,
 } as const;

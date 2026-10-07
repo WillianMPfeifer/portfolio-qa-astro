@@ -54,7 +54,7 @@ export const ui = {
       pageWeight: 'Home page weight',
       pageWeightHint: 'What the browser downloads when opening the home page (measured by Lighthouse).',
       bundle: 'Build output',
-      bundleHint: 'Everything that gets published: pages, images, fonts, docs and the résumé PDF. Nobody downloads all of it at once.',
+      bundleHint: 'Everything that gets published: pages, images, fonts, docs and the resume PDF. Nobody downloads all of it at once.',
       unavailable: 'unavailable',
       bestPractices: 'Best Practices',
     },

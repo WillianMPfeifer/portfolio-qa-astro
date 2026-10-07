@@ -30,8 +30,21 @@ const altLocaleHref = resolveAltLocaleHref(project, allProjects);
         {project.data.role}, {project.data.period}
       </p>
       <h1 class="mt-2 text-[clamp(2rem,5.5vw,3.25rem)]">{project.data.title}</h1>
-      <div class="mt-4">
+      <div class="mt-4 flex flex-wrap items-center gap-3">
         <StackList stack={project.data.stack} />
+        {
+          project.data.url && (
+            <a
+              href={project.data.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary inline-flex items-center gap-1.5 text-xs py-1 px-2.5"
+            >
+              <span>{locale === 'pt' ? 'Ver projeto online' : 'View live project'}</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          )
+        }
       </div>
     </header>
 

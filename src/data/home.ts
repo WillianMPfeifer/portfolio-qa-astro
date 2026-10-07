@@ -50,7 +50,7 @@ export interface HomeContent {
     outcome: string;
     readCase: string;
     seeAll: string;
-    freelance: { before: string; link: string; after: string };
+    freelance: { before: string; link: string; middle: string; secondLink: string; after: string };
   };
   beyond: { label: string; title: string; intro: string; items: string[] };
   journey: {
@@ -136,9 +136,11 @@ export const home: Record<Locale, HomeContent> = {
       readCase: 'Ler o caso completo',
       seeAll: 'Ver todos os projetos',
       freelance: {
-        before: 'Fora da automação, fiz o ',
-        link: 'redesign do site do Anibem Hospital Veterinário 24h',
-        after: ', projeto freelance em HTML5, Tailwind e JavaScript que substituiu um site que não funcionava.',
+        before: 'Fora da automação, desenvolvi projetos web como o ',
+        link: 'redesign do Hospital Veterinário Anibem 24h',
+        middle: ' e a landing page da ',
+        secondLink: 'Lava Center Lavanderia Self-Service',
+        after: ', ambos em HTML5, Tailwind e JavaScript com foco em SEO local e performance.',
       },
     },
     beyond: {
@@ -252,7 +254,7 @@ export const home: Record<Locale, HomeContent> = {
       lead: "For the last year and a half I've owned quality on a public-sector management system. I revived a Cypress suite nobody was running, built a second one from scratch with BDD, and put both in CI. When a script wiped production data, those suites are what confirmed the recovery worked.",
       location: 'Frederico Westphalen, Brazil',
       emailCta: 'Email me',
-      cvCta: 'Résumé (PDF, Portuguese)',
+      cvCta: 'Resume (PDF, Portuguese)',
       photoAlt: 'Willian Pfeifer, wearing glasses and a green shirt, in an office',
     },
     proof: {
@@ -291,9 +293,11 @@ export const home: Record<Locale, HomeContent> = {
       readCase: 'Read the full case',
       seeAll: 'See all projects',
       freelance: {
-        before: 'Outside automation, I did the ',
+        before: 'Outside automation, I have built web projects like the ',
         link: 'redesign of the Anibem 24h Veterinary Hospital website',
-        after: ', a freelance project in HTML5, Tailwind and JavaScript that replaced a site that no longer worked.',
+        middle: ' and the landing page for ',
+        secondLink: 'Lava Center Self-Service Laundromat',
+        after: ', both built with HTML5, Tailwind and JavaScript focusing on local SEO and performance.',
       },
     },
     beyond: {
