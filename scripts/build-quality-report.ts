@@ -189,13 +189,15 @@ function readLighthouseScores(manifestPath: string): LighthouseScores | null {
 }
 
 function main(): void {
+  const previousReport = readJsonIfExists<QualityReport>(path.join('src', 'data', 'quality.json'));
+
   const playwrightRaw = readJsonIfExists<PlaywrightJsonReport>(path.join('test-results', 'playwright-report.json'));
-  const playwrightSummary = playwrightRaw ? flattenPlaywrightReport(playwrightRaw) : null;
+  const playwrightSummary = playwrightRaw ? flattenPlaywrightReport(playwrightRaw) : (previousReport?.playwright ?? null);
 
-  const a11ySummary = readJsonIfExists<A11ySummary>(path.join('test-results', 'a11y-summary.json'));
+  const a11ySummary = readJsonIfExists<A11ySummary>(path.join('test-results', 'a11y-summary.json')) ?? previousReport?.a11y ?? null;
 
-  const lighthouseScores = readLighthouseScores(path.join('.lighthouseci', 'manifest.json'));
-  const pageWeightBytes = readLighthousePageWeight(path.join('.lighthouseci', 'manifest.json'));
+  const lighthouseScores = readLighthouseScores(path.join('.lighthouseci', 'manifest.json')) ?? previousReport?.lighthouse ?? null;
+  const pageWeightBytes = readLighthousePageWeight(path.join('.lighthouseci', 'manifest.json')) ?? previousReport?.pageWeightBytes ?? null;
 
   const bundleSizeBytes = fs.existsSync('dist') ? getDirectorySizeBytes('dist') : null;
 

@@ -29,8 +29,11 @@ function isPagePath(pathname: string): boolean {
 
 export async function crawlSite(page: Page, baseUrl: string): Promise<CrawlResult> {
   const origin = new URL(baseUrl).origin;
+  const rawBasePath = new URL(baseUrl).pathname.replace(/\/$/, '');
+  const basePath = rawBasePath === '' ? '' : rawBasePath;
+  const initialPath = basePath ? `${basePath}/` : '/';
   const visited = new Set<string>();
-  const queue: string[] = ['/'];
+  const queue: string[] = [initialPath];
   const routes: RouteCheck[] = [];
   const links: LinkCheck[] = [];
 
@@ -56,6 +59,7 @@ export async function crawlSite(page: Page, baseUrl: string): Promise<CrawlResul
 
       const resolved = new URL(href, pageUrl);
       if (resolved.origin !== origin) continue;
+      if (basePath && !resolved.pathname.startsWith(basePath)) continue;
 
       const linkResponse = await page.request.get(resolved.toString());
       links.push({

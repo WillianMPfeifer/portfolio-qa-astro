@@ -68,7 +68,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Commit quality.json
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: steps.build.outcome == 'success' && steps.unit.outcome == 'success' && steps.e2e.outcome == 'success' && steps.lighthouse.outcome == 'success' && steps.quality.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

@@ -6,6 +6,8 @@ const bddTestDir = defineBddConfig({
   steps: 'tests/steps/**/*.steps.ts',
 });
 
+const BASE_URL = 'http://localhost:4321/portfolio-qa-astro';
+
 export default defineConfig({
   fullyParallel: false,
   // one worker at a time — site-health.feature and a11y.spec.ts each independently crawl the whole site;
@@ -14,12 +16,15 @@ export default defineConfig({
   reporter: [['list'], ['json', { outputFile: 'test-results/playwright-report.json' }]],
   webServer: {
     command: 'npm run build && npm run preview -- --port 4321',
-    url: 'http://localhost:4321',
+    url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ASTRO_PREVIEW_BACKGROUND: '0',
+    },
   },
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: BASE_URL,
   },
   projects: [
     { name: 'bdd', testDir: bddTestDir, use: { ...devices['Desktop Chrome'] } },

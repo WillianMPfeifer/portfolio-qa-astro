@@ -7,7 +7,7 @@ const { Given, Then } = createBdd();
 let crawlResult: CrawlResult;
 
 Given('the site has been crawled from the home page', async ({ page, baseURL }) => {
-  crawlResult = await crawlSite(page, baseURL ?? 'http://localhost:4321');
+  crawlResult = await crawlSite(page, baseURL ?? 'http://localhost:4321/portfolio-qa-astro');
 });
 
 Then('every internal route that was found responds with an ok status', () => {

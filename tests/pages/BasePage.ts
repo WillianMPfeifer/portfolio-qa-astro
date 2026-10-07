@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 
+const BASE_PATH = '/portfolio-qa-astro';
+
 export class BasePage {
   readonly page: Page;
   readonly themeToggleButton: Locator;
@@ -14,7 +16,9 @@ export class BasePage {
   }
 
   async goto(path: string): Promise<void> {
-    await this.page.goto(path);
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const target = cleanPath.startsWith(BASE_PATH) ? cleanPath : `${BASE_PATH}${cleanPath}`;
+    await this.page.goto(target);
   }
 
   async getTheme(): Promise<string | null> {

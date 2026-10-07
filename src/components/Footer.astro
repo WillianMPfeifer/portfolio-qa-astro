@@ -17,13 +17,17 @@ const profileLinks = [
   <div class="container-page flex flex-col gap-3 py-6 text-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between">
     <p>
       Willian Pfeifer, {new Date().getFullYear()}. {t.madeWith}{' '}
-      <a href={links.repo} class="text-ink-soft hover:text-ink">{t.source}</a>
+      <a href={links.repo} target="_blank" rel="noopener noreferrer" class="text-ink-soft hover:text-ink">{t.source}</a>
     </p>
     <ul class="flex flex-wrap gap-4">
       {
         profileLinks.map((link) => (
           <li>
-            <a href={link.href} class="text-ink-soft no-underline hover:text-ink hover:underline">
+            <a
+              href={link.href}
+              {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              class="text-ink-soft no-underline hover:text-ink hover:underline"
+            >
               {link.label}
             </a>
           </li>
