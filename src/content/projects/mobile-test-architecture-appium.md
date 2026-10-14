@@ -1,11 +1,11 @@
 ---
 title: 'Mobile test architecture with Appium'
-role: 'QA Tester'
+role: 'QA Automation Engineer'
 period: '2025'
 date: 2025-08-01
-stack: ['Python', 'Appium', 'BDD']
-problem: 'No mobile automation existed; every change required a full day of manual retesting.'
-outcome: 'A working suite covering the main flows of the Education module.'
+stack: ['Python', 'Appium', 'BDD', 'Behave', 'Allure']
+problem: 'Zero mobile test automation in place; every release required a full day of repetitive manual regression testing.'
+outcome: 'Engineered a scalable BDD mobile framework covering core workflows, drastically reducing manual QA overhead.'
 featured: true
 lang: 'en'
 translationKey: 'mobile-automation-appium'
@@ -13,23 +13,22 @@ translationKey: 'mobile-automation-appium'
 
 ## Context
 
-No mobile automation existed. Every app change required a full manual regression test.
+The Digi Professores mobile application had no automated test coverage. Every release required full manual testing across all student and teacher workflows.
 
 ## Problem
 
-A full manual retest took at least a full day of one person's time for every change. Automating
-mobile also turned out to be slower than web — selecting elements was straightforward, but writing the
-tests around them took much longer. The app has a sync function that pushes data to the web system,
-and every test scenario had to trigger that sync and wait, adding extra time.
+Manual regression testing consumed at least a full engineer-day for every release cycle. Furthermore, mobile test automation introduced unique synchronization challenges:
+- High execution latency when locating dynamic elements on emulated devices.
+- Network and background data synchronization between the mobile app and the central web platform, which required unpredictable waiting times across scenarios.
+- Repetitive boilerplate code when managing mobile driver lifecycles and step definitions.
 
 ## Decisions
 
-Chose Python for its development practicality and library ecosystem. Chose Appium for its wide
-adoption and its fit with BDD, already part of the daily web automation workflow. For the sync
-bottleneck, built a reusable BDD step that handles the tap-and-wait instead of repeating that logic in
-every scenario.
+- **Framework Stack:** Selected Python with Appium and Behave (BDD/Gherkin) to leverage a lightweight scripting environment that mirrored the team's web testing conventions.
+- **Reporting:** Integrated Allure Reports for clear visual step tracing, screenshots on failure, and actionable execution summaries.
+- **Reusable Synchronization Engine:** Built custom BDD step definitions and polling waiters to manage background data syncing deterministically, eliminating arbitrary sleep timers.
+- **Page Object Architecture:** Decoupled UI selectors into dedicated element layers, simplifying maintenance when mobile screen layouts changed.
 
 ## Outcome
 
-A working automation suite covering the main flows of the Education module, with a reusable sync step
-resolving the wait bottleneck across all scenarios.
+Delivered an automated mobile testing suite covering all critical authentication and classroom workflows. The reusable synchronization design resolved flaky test runs and eliminated hours of repetitive manual verification per sprint.
