@@ -6,6 +6,7 @@ import { links } from '../../data/links';
 
 const locale = (Astro.currentLocale ?? 'en') as Locale;
 const t = home[locale].hero;
+const cvHref = locale === 'pt' ? links.cvPt : links.cvEn;
 ---
 
 <section class="container-page grid items-center gap-10 pt-12 pb-14 md:grid-cols-[1fr_minmax(0,340px)] md:gap-16 md:pt-20 md:pb-20">
@@ -18,7 +19,7 @@ const t = home[locale].hero;
     <p class="mt-6 max-w-[58ch] text-lg text-ink sm:text-xl sm:leading-relaxed">{t.lead}</p>
     <div class="mt-8 flex flex-wrap items-center gap-3">
       <a class="btn btn-primary" href={`mailto:${links.email}`}>{t.emailCta}</a>
-      <a class="btn btn-ghost" href={links.cv} download>{t.cvCta}</a>
+      <a class="btn btn-ghost" href={cvHref} download>{t.cvCta}</a>
       <a class="btn btn-ghost" href={links.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
       <a class="btn btn-ghost" href={links.github} target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>

@@ -254,7 +254,7 @@ export const home: Record<Locale, HomeContent> = {
       lead: "For the last year and a half I've owned quality on a public-sector management system. I revived a Cypress suite nobody was running, built a second one from scratch with BDD, and put both in CI. When a script wiped production data, those suites are what confirmed the recovery worked.",
       location: 'Frederico Westphalen, Brazil',
       emailCta: 'Email me',
-      cvCta: 'Resume (PDF, Portuguese)',
+      cvCta: 'Download Resume (PDF)',
       photoAlt: 'Willian Pfeifer, wearing glasses and a green shirt, in an office',
     },
     proof: {

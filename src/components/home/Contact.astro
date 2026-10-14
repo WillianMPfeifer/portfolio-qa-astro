@@ -9,6 +9,7 @@ import { links } from '../../data/links';
 const locale = (Astro.currentLocale ?? 'en') as Locale;
 const t = home[locale].contact;
 const quality = qualityData as QualityReport;
+const cvHref = locale === 'pt' ? links.cvPt : links.cvEn;
 
 // A linha "este site também é testado" só aparece se o CI gerou os três números.
 const qualityLine =
@@ -37,7 +38,7 @@ const qualityLine =
     <div class="mt-6 flex flex-wrap gap-3">
       <a class="btn btn-ghost" href={links.whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp</a>
       <a class="btn btn-ghost" href={links.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      <a class="btn btn-ghost" href={links.cv} download>{home[locale].hero.cvCta}</a>
+      <a class="btn btn-ghost" href={cvHref} download>{home[locale].hero.cvCta}</a>
       <a class="btn btn-ghost" href={links.github} target="_blank" rel="noopener noreferrer">GitHub</a>
       <a class="btn btn-ghost" href={links.credly} target="_blank" rel="noopener noreferrer">Credly</a>
     </div>
